@@ -17,7 +17,7 @@ if BRIDGE.Framework == "ESX" then
    end
 elseif BRIDGE.Framework == "QB" then
    Framework = exports['qb-core']:GetCoreObject()
-end
+end 
 
 RegisterNetEvent('esx:playerLoaded')
 AddEventHandler('esx:playerLoaded',function(xPlayer, isNew, skin)

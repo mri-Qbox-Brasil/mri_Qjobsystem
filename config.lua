@@ -13,7 +13,7 @@ Config.DEFAULT_ANIM = "hack_loop"
 Config.DEFAULT_ANIM_DIC = "mp_prison_break"
 
 Config.BlacklistedStrings = {
-    "weapon", "weed", "meth","coke", "ammo", "gun", "pistol", "drug", "c4", "WEAPON", "AMMO", "at_", "keycard", "gun", "money", "black_money"
+    "weapon", "weed", "meth", "coke", "ammo", "gun", "pistol", "drug", "c4", "WEAPON", "AMMO", "at_", "keycard", "gun", "money", "black_money"
 }
 
 Config.DirectoryToInventoryImages = "nui://ox_inventory/web/images/"

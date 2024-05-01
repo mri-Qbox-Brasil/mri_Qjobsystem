@@ -15,7 +15,7 @@ local IS_SERVER = IsDuplicityVersion()
 
 BRIDGE = {}
 
-BRIDGE.Framework = "ESX" -- ESX / QB / OX
+BRIDGE.Framework = "QB" -- ESX / QB / OX
 
 -- Supports inventory
 -- ox_inventory  - https://github.com/overextended/ox_inventory
