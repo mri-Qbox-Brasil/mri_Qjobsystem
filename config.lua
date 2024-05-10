@@ -20,8 +20,8 @@ Config.DirectoryToInventoryImages = "nui://ox_inventory/web/images/"
 
 if not IS_SERVER then
     function openBossmenu(jobname)
-        print("Bossmenu open")
-        -- exports.yourbossmenu:openBossmenu()
+        -- print("Bossmenu open")
+        exports.qbx_management:OpenBossMenu('job')
     end
 
     function SendDispatch(coords, jobLabel)
