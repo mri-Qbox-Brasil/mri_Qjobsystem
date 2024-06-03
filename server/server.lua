@@ -1,35 +1,76 @@
 local Jobs = {}
+local dataJobs = {}
+
+local function decodeGrades(grades)
+    local result = {}
+    for k, v in pairs(grades) do
+        result[tonumber(k)] = v
+    end
+
+    return result
+end
+
+local function LoadJobs()
+    local loadFile = LoadResourceFile(GetCurrentResourceName(), "./server/jobs.json")
+    if not loadFile then
+        SaveResourceFile(GetCurrentResourceName(), "./server/jobs.json", json.encode({}), -1)
+        loadFile = {}
+    end
+    Jobs = json.decode(loadFile)
+    for _, job in pairs(Jobs) do 
+        if job.stashes then
+            for _, stash in pairs(job.stashes) do
+                BRIDGE.RegisterStash(stash.id, stash.label,stash.slots, stash.weight)
+            end
+        else
+            job.stashes = {}
+        end
+        if job.type == "job" then
+            dataJobs[job.job] = {
+                label = job.label,
+                defaultDuty = true,
+                offDutyPay = false,
+                grades = decodeGrades(job.grades),
+            }
+            exports.qbx_core:CreateJobs({[job.job] = dataJobs[job.job]})
+        elseif job.type == "gang" then
+            dataJobs[job.job] = {
+                label = job.label,
+                grades = decodeGrades(job.grades),
+            }
+            exports.qbx_core:CreateGangs({[job.job] = dataJobs[job.job]})
+        end
+        print(job.type)
+        print(json.encode(dataJobs[job.job]))
+    end
+    print(json.encode(dataJobs))
+    Wait(2000)
+    TriggerClientEvent("pls_jobsystem:client:receiveJobs", -1, Jobs)
+
+end
 
 
 AddEventHandler('onResourceStart', function(resourceName)
     if (GetCurrentResourceName() == resourceName) then
-        local loadFile = LoadResourceFile(GetCurrentResourceName(), "./server/jobs.json")
-        if not loadFile then
-            SaveResourceFile(GetCurrentResourceName(), "./server/jobs.json", json.encode({}), -1)
-            loadFile = {}
-        end
-        Jobs = json.decode(loadFile)
-        for _, job in pairs(Jobs) do 
-            if job.stashes then
-                for _, stash in pairs(job.stashes) do
-                    BRIDGE.RegisterStash(stash.id, stash.label,stash.slots, stash.weight)
-                end
-            else
-                job.stashes = {}
-            end
-        end
-        Wait(2000)
-        TriggerClientEvent("pls_jobsystem:client:recivieJobs", -1, Jobs)
+        LoadJobs()
+    end
+end)
+
+AddEventHandler('onResourceStop', function(resourceName)
+    if (GetCurrentResourceName() == resourceName) then
+        exports.qbx_core:RemoveJob(dataJobs)
     end
 end)
 
 AddEventHandler(GetCurrentResourceName()..':playerLoaded', function(playerId)
     Wait(2000)
-    TriggerClientEvent("pls_jobsystem:client:recivieJobs", playerId, Jobs)
+    TriggerClientEvent("pls_jobsystem:client:receiveJobs", playerId, Jobs)
 end)
 
 local function SaveJobs()
     SaveResourceFile(GetCurrentResourceName(), "./server/jobs.json", json.encode(Jobs), -1)
+    Wait(500)
+    LoadJobs()
 end
 
 local function IsJobExist(jobName) 
@@ -66,8 +107,8 @@ AddEventHandler("pls_jobsystem:server:saveNewJob", function(jobData)
             if not IsJobExist(jobData.job) then
                     table.insert(Jobs, jobData)
                     lib.notify(src, {
-                        title="Hell yeah!",
-                        description="A new job has been created!",
+                        title="Sucesso",
+                        description="Um novo trabalho foi criado!",
                         type="success"
                     })
                     SaveJobs()
@@ -77,8 +118,8 @@ AddEventHandler("pls_jobsystem:server:saveNewJob", function(jobData)
                         Jobs[i] = jobData
                         SaveJobs()
                         lib.notify(src, {
-                            title="Hell yeah!",
-                            description="Job has been saved!",
+                            title="Sucesso",
+                            description="O trabalho foi salvo!",
                             type="success"
                         })
                     end

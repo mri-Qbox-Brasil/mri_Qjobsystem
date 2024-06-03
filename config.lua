@@ -7,6 +7,8 @@ Config.DefaultDataJob = {
     job = "", -- STRING
     area = vector3(0,0,0), -- VECTOR 3
     craftings = {}, -- TABLE
+    type = "",
+    grades = {}
 }
 
 Config.DEFAULT_ANIM = "hack_loop"
@@ -19,9 +21,10 @@ Config.BlacklistedStrings = {
 Config.DirectoryToInventoryImages = "nui://ox_inventory/web/images/"
 
 if not IS_SERVER then
-    function openBossmenu(jobname)
+    function openBossmenu(jobtype)
         -- print("Bossmenu open")
-        exports.qbx_management:OpenBossMenu('job')
+        print(jobtype)
+        exports.qbx_management:OpenBossMenu(jobtype)
     end
 
     function SendDispatch(coords, jobLabel)

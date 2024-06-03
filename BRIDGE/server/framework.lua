@@ -89,32 +89,20 @@ BRIDGE.GetPlayerJob = function (playerId)
    return JobName
 end
 
-
---[[
-   _____      _    _____               _      
-  / ____|    | |  / ____|             | |     
- | |  __  ___| |_| |  __ _ __ __ _  __| | ___ 
- | | |_ |/ _ \ __| | |_ | '__/ _` |/ _` |/ _ \
- | |__| |  __/ |_| |__| | | | (_| | (_| |  __/
-  \_____|\___|\__|\_____|_|  \__,_|\__,_|\___|
-                                              
-                                                                                                                                                                                                            
-]]--
-
-BRIDGE.GetPlayerJob = function (playerId)
-   local JobName = nil
+BRIDGE.GetPlayerGang = function (playerId)
+   local GangName = nil
    if BRIDGE.Framework == "ESX" then
        local PlayerData = Framework.GetPlayerData(playerId)
-       JobName = PlayerData.job.grade
+       GangName = PlayerData.gang.name
    elseif BRIDGE.Framework == "QB" then
        local Player = Framework.Functions.GetPlayerData(playerId)
-       JobName = Player.job.grade
+       GangName = Player.gang.name
    elseif BRIDGE.Framework == "OX" then
       local player = Ox.GetPlayer(playerId)
-      local Job = player.get("inService")
-      JobName = Job.grade
+      local Gang = player.get("inService")
+      GangName = Gang.name
    end
-   return JobName
+   return GangName
 end
 
 
