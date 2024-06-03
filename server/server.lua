@@ -3,10 +3,22 @@ local dataJobs = {}
 
 local function decodeGrades(grades)
     local result = {}
+    local count = -1
+    local newboss = {}
     for k, v in pairs(grades) do
-        result[tonumber(k)] = v
+        count = count + 1
     end
 
+    for k, v in pairs(grades) do
+        if tonumber(k) == tonumber(count) then
+            newboss = v
+            newboss.isboss = true
+            newboss.bankAuth = true
+            result[tonumber(k)] = newboss
+        else
+            result[tonumber(k)] = v
+        end
+    end
     return result
 end
 
@@ -17,14 +29,7 @@ local function LoadJobs()
         loadFile = {}
     end
     Jobs = json.decode(loadFile)
-    for _, job in pairs(Jobs) do 
-        if job.stashes then
-            for _, stash in pairs(job.stashes) do
-                BRIDGE.RegisterStash(stash.id, stash.label,stash.slots, stash.weight)
-            end
-        else
-            job.stashes = {}
-        end
+    for _, job in pairs(Jobs) do
         if job.type == "job" then
             dataJobs[job.job] = {
                 label = job.label,
@@ -40,25 +45,44 @@ local function LoadJobs()
             }
             exports.qbx_core:CreateGangs({[job.job] = dataJobs[job.job]})
         end
-        print(job.type)
-        print(json.encode(dataJobs[job.job]))
     end
-    print(json.encode(dataJobs))
-    Wait(2000)
-    TriggerClientEvent("pls_jobsystem:client:receiveJobs", -1, Jobs)
-
 end
 
 
 AddEventHandler('onResourceStart', function(resourceName)
     if (GetCurrentResourceName() == resourceName) then
-        LoadJobs()
-    end
-end)
-
-AddEventHandler('onResourceStop', function(resourceName)
-    if (GetCurrentResourceName() == resourceName) then
-        exports.qbx_core:RemoveJob(dataJobs)
+        local loadFile = LoadResourceFile(GetCurrentResourceName(), "./server/jobs.json")
+        if not loadFile then
+            SaveResourceFile(GetCurrentResourceName(), "./server/jobs.json", json.encode({}), -1)
+            loadFile = {}
+        end
+        Jobs = json.decode(loadFile)
+        for _, job in pairs(Jobs) do
+            if job.stashes then
+                for _, stash in pairs(job.stashes) do
+                    BRIDGE.RegisterStash(stash.id, stash.label,stash.slots, stash.weight)
+                end
+            else
+                job.stashes = {}
+            end
+            if job.type == "job" then
+                dataJobs[job.job] = {
+                    label = job.label,
+                    defaultDuty = true,
+                    offDutyPay = false,
+                    grades = decodeGrades(job.grades),
+                }
+                exports.qbx_core:CreateJobs({[job.job] = dataJobs[job.job]})
+            elseif job.type == "gang" then
+                dataJobs[job.job] = {
+                    label = job.label,
+                    grades = decodeGrades(job.grades),
+                }
+                exports.qbx_core:CreateGangs({[job.job] = dataJobs[job.job]})
+            end
+        end
+        Wait(2000)
+        TriggerClientEvent("pls_jobsystem:client:receiveJobs", -1, Jobs)
     end
 end)
 
@@ -140,16 +164,16 @@ AddEventHandler("pls_jobsystem:server:saveJob", function(jobData)
                             Jobs[i] = jobData
                             SaveJobs()
                             lib.notify(src, {
-                                title="Hell yeah!",
-                                description="Job has been saved!",
+                                title="Sucesso",
+                                description="O trabalho foi salvo!",
                                 type="success"
                             })
                         end
                     end
             else
                 lib.notify(src, {
-                    title="WTF Bro?",
-                    description="Someone propably delete this job.. :( ",
+                    title="Erro",
+                    description="Alguém provavelmente já excluiu esse grupo :( ",
                     type="error"
                 })
             end 
@@ -168,16 +192,16 @@ AddEventHandler("pls_jobsystem:server:deleteJob", function(jobData)
                         table.remove(Jobs, i)
                         SaveJobs()
                         lib.notify(src, {
-                            title="Hell yeah!",
-                            description="Job has been deleted!",
+                            title="Sucesso",
+                            description="O grupo foi excluído!",
                             type="success"
                         })
                     end
                 end
             else
                 lib.notify(src, {
-                    title="WTF Bro?",
-                    description="This job doesnt exist! ",
+                    title="Erro",
+                    description="Este trabalho não existe!",
                     type="error"
                 })
             end 
@@ -229,8 +253,8 @@ AddEventHandler("pls_jobsystem:server:createItem", function(craftingData)
                 BRIDGE.AddItem(src, craftingData.itemName, craftingData.itemCount)
               else
                 lib.notify(src,{
-                  title="Job",
-                  description="Your dont have all items!",
+                  title="Negado",
+                  description="Você não tem todos os itens!",
                   type="error"
                 })
               end
@@ -249,19 +273,19 @@ AddEventHandler("pls_jobsystem:server:makeRegisterAction", function(jobName, act
                         job.balance = 0
                     end
                     if action == "withdraw" then
-                        if job.balance > 0 and job.balance >= number and job.balance-number > 0 then
+                        if job.balance > 0 and job.balance >= number and job.balance-number >= 0 then
                             job.balance = job.balance - number
                             BRIDGE.AddItem(src, "money", number)
                             lib.notify(src, {
-                                title="Withdraw",
-                                description="Done!",
+                                title="Retirar",
+                                description="Realizado com sucesso!!",
                                 type="success"
                             })
                             SaveJobs()
                         else
                             lib.notify(src, {
-                                title="Withdraw",
-                                description="Cannot be done",
+                                title="Retirar",
+                                description="Não pode ser feito",
                                 type="error"
                             })
                         end
@@ -271,15 +295,15 @@ AddEventHandler("pls_jobsystem:server:makeRegisterAction", function(jobName, act
                             job.balance = job.balance + number
                             BRIDGE.RemoveItem(src, "money", number)
                             lib.notify(src, {
-                                title="Deposit",
-                                description="Done!",
+                                title="Depósito",
+                                description="Realizado com sucesso!",
                                 type="success"
                             })
                             SaveJobs()
                         else
                             lib.notify(src, {
-                                title="Deposit",
-                                description="You don't have enough money",
+                                title="Depósito",
+                                description="Você não tem dinheiro suficiente",
                                 type="error"
                             })
                         end
@@ -297,8 +321,8 @@ AddEventHandler("pls_jobsystem:server:createBackup", function(pullType)
     if CanTrustPlayer(src) then
         SaveResourceFile(GetCurrentResourceName(), "./server/backup.json", json.encode(Jobs), -1)
         lib.notify(src, {
-            title="Backup done!",
-            description="Congrats! Now you can do stupid things.",
+            title="Backup feito com sucesso!",
+            description="Parabéns! Agora você pode fazer coisas estúpidas.",
             type="success"
         })
     end
@@ -320,14 +344,14 @@ end)
 
 
 lib.addCommand('createjob', {
-    help = 'This command create job',
+    help = 'Este comando cria jobs e gangs',
     restricted = 'group.admin'
 }, function(source, args, raw)
     TriggerClientEvent("pls_jobsystem:client:createjob", source)
 end)
 
 lib.addCommand('open_jobs', {
-    help = 'This command open your job menu.',
+    help = 'Este comando abre seu menu de jobs e gangs.',
     restricted = 'group.admin'
 }, function(source, args, raw)
     TriggerClientEvent("pls_jobsystem:client:openJobMenu", source, Jobs)

@@ -25,7 +25,7 @@ end
 for _, v in pairs(items) do
   if not IsBlacklistedString(v.name) then
     table.insert(item_select, {
-      label = v.label,
+      label = string.format("%s (%s)", v.label, v.name),
       value = v.name,
     })
   end
@@ -35,16 +35,24 @@ end
 
 local function CreateNewCraftingPoint()
   lib.notify({
-    title = "Select point",
-    description = "Confirm by [ E ]",
-    type = "inform"
+    title = "Selecionar Local",
+    description = "Confirme pressionando [E]",
+    type = "info",
+    duration = 10000
   })
   while true do
-    Wait(0)
-    local hit, entity, coords = lib.raycast.cam(1|16)
+    local hit, entity, coords = lib.raycast.cam(1, 4)
+    lib.showTextUI(
+      'PARA  \nCONFIRMAR  \n**LOCAL**  \n  \n X:  ' ..
+      math.round(coords.x) .. ',  \n Y:  ' .. math.round(coords.y) .. ',  \n Z:  ' .. math.round(coords.z),
+      {
+        icon = "e"
+      })
+
     if hit then
       DrawSphere(coords.x, coords.y, coords.z, 0.2, 0, 0, 255, 0.2)
-      if IsControlJustPressed(1, 38) then -- E
+      if IsControlJustReleased(1, 38) then -- E
+        lib.hideTextUI()
         return coords
       end
     end
@@ -55,9 +63,9 @@ local function CreateCraftingTable()
   local coords = CreateNewCraftingPoint()
   if coords then
     if selectedJob.craftings then
-      local input = lib.inputDialog('Create new job',
+      local input = lib.inputDialog('Criação de Crafting',
         {
-          { type = 'input', label = 'Label', description = 'Add crafting table label', required = true, min = 4, max = 32 },
+          { type = 'input', label = 'Label', description = 'Adicionar rótulo da mesa de fabricação', required = true, min = 4, max = 32 },
         })
       if not input then return end
       table.insert(selectedJob.craftings, {
@@ -69,8 +77,8 @@ local function CreateCraftingTable()
         }
       })
       local alert = lib.alertDialog({
-        header = 'Crafting creation',
-        content = '# Crafting done! You want create new crafting point? ',
+        header = 'Criação de crafting',
+        content = 'Criação feita! Você quer criar um novo ponto de artesanato?',
         centered = true,
         cancel = true
       })
@@ -79,6 +87,8 @@ local function CreateCraftingTable()
         CreateCraftingTable()
       else
         TriggerSecureEvent("pls_jobsystem:server:saveNewJob", selectedJob)
+        Wait(500)
+        EditCrafings()
       end
     end
   end
@@ -88,23 +98,23 @@ end
 local function CreateNewStash()
   local coords = CreateNewCraftingPoint()
   if coords then
-    local input = lib.inputDialog('Create stash',
+    local input = lib.inputDialog('Criação de Baú',
       {
-        { type = 'input',  label = 'Label',  description = 'Stash label',                 required = true, min = 4, max = 32 },
-        { type = 'number', label = 'Slots',  description = 'How many slots do you want?', required = true },
-        { type = 'number', label = 'Weight', description = 'Maximum weight',              required = true },
+        { type = 'input',  label = 'Nome',  description = 'Nome do baú',               required = true, min = 4, max = 32 },
+        { type = 'number', label = 'Slots', description = 'Quantos slots terá o baú?', required = true },
+        { type = 'number', label = 'Peso',  description = 'Peso máximo em gramas',     required = true },
         {
           type = "select",
-          label = "Limited by job",
-          description = "You want limite by job?",
+          label = "Permissão",
+          description = "Você quer limitar o acesso ao baú apenas para o grupo?",
           required = true,
           options = {
             {
-              label = "Yes",
+              label = "Sim",
               value = "yyy",
             },
             {
-              label = "No",
+              label = "Não",
               value = "nah",
             },
           }
@@ -153,11 +163,12 @@ local function CreateNewPed()
   })
   TriggerSecureEvent("pls_jobsystem:server:saveNewJob", selectedJob)
 end
+
 local function AddonsExists(value)
   if value then
-    return "Created"
+    return "Criado"
   else
-    return "Not created"
+    return "Não criado"
   end
 end
 
@@ -165,35 +176,48 @@ local function selectJob(jobData)
   selectedJob = jobData
   lib.registerContext({
     id = 'job_manipulate',
-    title = 'Gerenciar',
+    title = jobData.label,
+    description = "Gerenciamento",
     menu = 'job_menu_open',
     options = {
       {
         title = selectedJob.label,
-        description = "Clique aqui para renomear",
+        description = "Clique aqui para renomear.",
         icon = 'quote-left',
         onSelect = function()
-          local input = lib.inputDialog('Trabalho de edição',
+          local input = lib.inputDialog('Editar nome',
             {
-              { type = 'input', label = 'Label', description = 'Coloque algum nome para este trabalho.', required = true, min = 4, max = 16 },
+              { type = 'input', label = 'Nome', description = 'Coloque algum nome para este grupo.', required = true, min = 4, max = 16 },
             })
-          if not input then return end
+          if not input then return selectJob(jobData) end
           selectedJob.label = input[1]
           TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+          Wait(500)
+          selectJob(jobData)
         end,
       },
       {
-        title = "Tamanho da área:" .. selectedJob.area,
-        description = "Clique aqui para mudar a área de trabalho",
+        title = "Cargos",
+        description = "Gerenciar hierarquia do grupo e salário.",
+        icon = 'sitemap',
+        onSelect = function()
+          OpenJobsGrades(jobData)
+        end,
+      },
+      {
+        title = "Tamanho da área: " .. selectedJob.area,
+        description = "Clique aqui para mudar o tamanho da área do grupo. ",
         icon = 'expand',
         onSelect = function()
-          local input = lib.inputDialog('Trabalho de edição',
+          local input = lib.inputDialog('Editar Área',
             {
-              { type = 'number', label = 'Área', description = 'Qual é o tamanho da área de trabalho?', icon = 'hashtag', min = 10, max = 100 },
+              { type = 'number', label = 'Tamanho', description = 'Essa é a área onde os NPCs, báus e craftings podem ser criados.', min = 10, max = 100 },
             })
-          if not input then return end
+          if not input then return selectJob(jobData) end
           selectedJob.area = input[1]
           TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+          Wait(500)
+          selectJob(jobData)
         end,
       },
       {
@@ -203,8 +227,8 @@ local function selectJob(jobData)
         onSelect = function()
           if selectedJob.register then
             local alert = lib.alertDialog({
-              header = "Exclua a caixa registradora",
-              content = "Você realmente quer excluir? ",
+              header = "Excluir a caixa registradora",
+              content = "Você realmente quer excluir?",
               centered = true,
               cancel = true
             })
@@ -212,12 +236,16 @@ local function selectJob(jobData)
               selectedJob.register = nil
               TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
             end
+            Wait(500)
+            selectJob(jobData)
           else
             local coords = CreateNewCraftingPoint()
             if coords then
               selectedJob.register = coords
               TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
             end
+            Wait(500)
+            selectJob(jobData)
           end
         end,
       },
@@ -229,7 +257,7 @@ local function selectJob(jobData)
           if selectedJob.alarm then
             local alert = lib.alertDialog({
               header = "Excluir alarme",
-              content = "Você realmente quer excluir? ",
+              content = "Você realmente quer excluir?",
               centered = true,
               cancel = true
             })
@@ -237,18 +265,22 @@ local function selectJob(jobData)
               selectedJob.alarm = nil
               TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
             end
+            Wait(500)
+            selectJob(jobData)
           else
             local coords = CreateNewCraftingPoint()
             if coords then
               selectedJob.alarm = coords
               TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
             end
+            Wait(500)
+            selectJob(jobData)
           end
         end,
       },
       {
         title = "Bossmenu",
-        description = "Status: " .. AddonsExists(selectedJob.bossmenu) .. " / Export config.lua - function openBossmenu",
+        description = "Status: " .. AddonsExists(selectedJob.bossmenu),
         icon = 'laptop',
         onSelect = function()
           if selectedJob.bossmenu then
@@ -262,18 +294,22 @@ local function selectJob(jobData)
               selectedJob.bossmenu = nil
               TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
             end
+            Wait(500)
+            selectJob(jobData)
           else
             local coords = CreateNewCraftingPoint()
             if coords then
               selectedJob.bossmenu = coords
               TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
             end
+            Wait(500)
+            selectJob(jobData)
           end
         end,
       },
       {
         title = "Craftings",
-        description = "Clique aqui para abrir o menu de artesanato",
+        description = "Clique aqui para abrir o menu de crafting.",
         icon = 'box',
         onSelect = function()
           EditCrafings()
@@ -281,7 +317,7 @@ local function selectJob(jobData)
       },
       {
         title = "Baús",
-        description = "Clique aqui para o menu de baús",
+        description = "Clique aqui para o menu de baús.",
         icon = 'boxes-stacked',
         onSelect = function()
           EditStashes()
@@ -289,20 +325,20 @@ local function selectJob(jobData)
       },
       {
         title = "Peds",
-        description = "Clique aqui para abrir o menu PED",
+        description = "Clique aqui para abrir o menu PED.",
         icon = 'person',
         onSelect = function()
           EditPeds()
         end,
       },
       {
-        title = "Excluir trabalho",
-        description = "Clique aqui para excluir este trabalho.",
+        title = "Excluir grupo",
+        description = "Clique aqui para excluir este grupo.",
         icon = 'trash',
         onSelect = function()
           local alert = lib.alertDialog({
-            header = 'Excluir trabalho' .. selectedJob.label,
-            content = "Você realmente quer excluir o trabalho?",
+            header = 'Excluir o grupo: ' .. selectedJob.label,
+            content = "Você realmente quer excluir o grupo?",
             centered = true,
             cancel = true
           })
@@ -319,6 +355,8 @@ local function selectJob(jobData)
         icon = 'arrow-up',
         onSelect = function()
           TriggerSecureEvent("pls_jobsystem:server:pullChanges", "creator")
+          Wait(500)
+          selectJob(jobData)
         end,
       },
       {
@@ -327,24 +365,26 @@ local function selectJob(jobData)
         icon = 'arrow-up',
         onSelect = function()
           TriggerSecureEvent("pls_jobsystem:server:pullChanges", "all")
+          Wait(500)
+          selectJob(jobData)
         end,
       },
       {
         title = "Backup",
-        description = "Isso é ótimo se algo der errado. (Isso é backup para todos os trabalhos!)",
+        description = "Isso é ótimo se algo der errado. (Faz o backup para todos os grupos)",
         icon = 'floppy-disk',
         onSelect = function()
           local options = {
             {
               title = "Criar backup",
-              description = "Isso cria backup...",
+              description = "Salvar novo backup, isso sobrescreve o backup que existir atualmetente.",
               icon = "plus",
               onSelect = function()
                 TriggerSecureEvent("pls_jobsystem:server:createBackup")
               end
             },
             {
-              title = "Use o último backup!",
+              title = "Restaurar último backup existente",
               description = "Usar o último backup! Primeiro verifique se server/backup.json NÃO ESTÁ VAZIO!",
               icon = "floppy-disk",
               onSelect = function()
@@ -374,6 +414,156 @@ local function selectJob(jobData)
   lib.showContext("job_manipulate")
 end
 
+function OpenJobsGrades(jobData)
+  selectedJob = jobData
+  print(json.encode(jobData))
+  local options = {}
+
+  options[#options + 1] = {
+    title = "Criar cargo",
+    description = "Clique aqui para criar um cargo.",
+    icon = 'plus',
+    onSelect = function()
+      local inputOptions = {
+        { type = 'input', label = 'Nome', description = 'Coloque algum nome para este cargo.', required = true, min = 4, max = 16 }
+      }
+
+      if jobData.type == 'job' then
+        inputOptions[#inputOptions + 1] = {
+          type = 'number',
+          label = 'Salário',
+          description = 'Coloque o valor do salário para este cargo.',
+          required = true,
+          min = 0
+        }
+      end
+      local input = lib.inputDialog('Criar cargo', inputOptions)
+      if not input then return selectJob(jobData) end
+
+      local count = 0
+      for i, grade in pairs(jobData.grades) do
+        count = count + 1
+      end
+
+      selectedJob.grades[count] = {
+        name = input[1],
+        payment = input[2],
+      }
+
+      print(json.encode(selectedJob))
+      TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+      lib.notify({
+        title = 'Cargo criado',
+        description = 'O cargo foi criado com sucesso.',
+        type = 'success'
+      })
+      Wait(500)
+      return OpenJobsGrades(jobData)
+    end
+  }
+
+  options[#options + 1] = {
+    title = "Excluir cargo mais alto",
+    description = "Clique para excluir o cargo mais alto.",
+    icon = 'trash',
+    iconColor = 'red',
+    onSelect = function()
+      local alert = lib.alertDialog({
+        header = 'Excluir cargo',
+        content = "Você realmente quer excluir o cargo?",
+        centered = true,
+        cancel = true
+      })
+      if alert ~= "confirm" then return OpenJobsGrades(jobData) end
+
+      local count = -1
+      for i, grade in pairs(jobData.grades) do
+        count = count + 1
+      end
+      local newGrades = {}
+      for k, v in pairs(jobData.grades) do
+        if tonumber(k) ~= tonumber(count) then
+          newGrades[k] = v
+        end
+      end
+
+      selectedJob.grades = newGrades
+      TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+
+      print(json.encode(selectedJob))
+
+      lib.notify({
+        title = 'Cargo excluído',
+        description = 'O cargo foi excluído com sucesso.',
+        type = 'success'
+      })
+      Wait(500)
+      return OpenJobsGrades(selectedJob)
+    end
+  }
+
+  local count = -1
+  for i, grade in pairs(jobData.grades) do
+    count = count + 1
+  end
+  for i, grade in pairs(jobData.grades) do
+    local description = ""
+    if jobData.type == 'job' then
+      description = string.format('Salário: R$ %s', grade.payment)
+    end
+
+    if tonumber(i) == count then
+      description = string.format('%s  \n  *Boss do Grupo*', description)
+    end
+
+    local newOption = {
+      title = '[' .. i .. '] ' .. grade.name,
+      description = description,
+      icon = 'circle',
+      onSelect = function()
+        local inputOptions = {
+          { type = 'input', label = 'Nome', description = 'Coloque algum nome para este cargo.', required = true, min = 4, max = 16, default = grade.name },
+        }
+
+        if jobData.type == 'job' then
+          inputOptions[#inputOptions + 1] = {
+            type = 'number',
+            label = 'Salário',
+            description = 'Coloque o valor do salário para este cargo.',
+            required = true,
+            min = 0,
+            default = grade.payment
+          }
+        end
+
+        local input = lib.inputDialog('Editar cargo', inputOptions)
+        if not input then return selectJob(jobData) end
+
+        if jobData.type == 'job' then
+          grade.payment = input[2]
+        end
+        grade.name = input[1]
+        TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+        Wait(500)
+        OpenJobsGrades(jobData)
+      end,
+    }
+    table.insert(options, newOption)
+  end
+  table.sort(options, function(a, b) return a.title < b.title end)
+
+  lib.registerContext({
+    id = 'job_grades',
+    title = 'Hierarquia',
+    description = 'Gerenciamento',
+    options = options,
+    menu = 'job_manipulate',
+    onBack = function()
+      selectJob(jobData)
+    end,
+  })
+  lib.showContext("job_grades")
+end
 
 local function openCraftingTable(id)
   local selectedCrafting = selectedJob.craftings[id]
@@ -385,6 +575,7 @@ local function openCraftingTable(id)
         title = items[craftingItem.itemName].label,
         description = "Editar o item existente.",
         icon = 'circle',
+        image = Config.DirectoryToInventoryImages .. craftingItem.itemName .. ".png",
         onSelect = function()
           cached.crafting_item_id = itemId
           EditCraftingItem()
@@ -394,87 +585,82 @@ local function openCraftingTable(id)
     end
     table.insert(options, {
       title = "Crie um novo item",
-      description = "Crie um novo item para esta tabela de CRAFTING.",
-      icon = 'circle',
+      description = "Crie um novo item para esta mesa de fabricação.",
+      icon = 'plus',
       onSelect = function()
-        local FilterData = {
-          useFilter = false,
-          filteredData = {}
-        }
-        :: BackToFilter ::
-        local showedItems = {}
-        if FilterData.useFilter then
-          for _, filterWorld in pairs(FilterData.filteredData) do
-            for _, item in pairs(item_select) do
-              if string.find(string.lower(item.label), string.lower(filterWorld)) then
-                table.insert(showedItems, item)
-              end
-            end
-          end
-        else
-          showedItems = item_select
-          FilterData.filteredData = {}
-        end
         local input = lib.inputDialog('Selecione Item e Ingredientes', {
-          { type = 'textarea',     label = "Filter - Filled search / Unfilled saves", description = "Write the labels of the items you want to filter. Separate them with ,", required = false, placeholder = "Meat, Fish, Bone", clearable = true },
-          { type = 'select',       label = "Main item",                               description = "This is the item you want to crafting.",                                 required = true,  options = showedItems,            clearable = true },
-          { type = 'multi-select', label = "Ingedience",                              description = "Required",                                                               required = true,  options = showedItems,            clearable = true },
+          {
+            type = 'select',
+            label = "Item principal",
+            placeholder = "Selecionar",
+            description = "Este é o item que você deseja criar.",
+            required = true,
+            options = item_select,
+            searchable = true,
+            clearable = true
+          },
+          {
+            type = 'multi-select',
+            label = "Itens necessários",
+            placeholder = "Quais itens serão necessários para fabricar o item principal?",
+            description = "Required",
+            required = true,
+            options = item_select,
+            searchable = true,
+            clearable = true
+          },
         })
         if input then
-          if tostring(input[1]) ~= "" then
-            local searched_value = tostring(input[1])
-            FilterData.useFilter = true
-            for word in searched_value:gmatch("[^,%s]+") do
-              table.insert(FilterData.filteredData, word)
-            end
-            goto BackToFilter
-          end
-          if input[1] == "" then
-            local defineIngedience = {}
-            for _, selectedIngedience in pairs(input[3]) do
-              table.insert(defineIngedience, {
-                itemName = selectedIngedience,
-                itemCount = 1,
-              })
-            end
-
-            local newTable = {
-              itemName = input[2],
+          local defineIngedience = {}
+          for _, selectedIngedience in pairs(input[2]) do
+            table.insert(defineIngedience, {
+              itemName = selectedIngedience,
               itemCount = 1,
-              ingedience = defineIngedience
-            }
-            table.insert(selectedJob.craftings[id].items, newTable)
-            TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
-            lib.notify({
-              title = "New recipe created",
-              description = "Congrats! New recepie has been created.",
-              type = "success"
             })
-            openCraftingTable(cached.crafting_table_id)
           end
+
+          local newTable = {
+            itemName = input[1],
+            itemCount = 1,
+            ingedience = defineIngedience
+          }
+          table.insert(selectedJob.craftings[id].items, newTable)
+          TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+          lib.notify({
+            title = "Sucesso",
+            description = "Parabéns! Nova receita criada.",
+            type = "success"
+          })
+          openCraftingTable(cached.crafting_table_id)
         end
       end,
     })
 
     table.insert(options, {
-      title = "Delete table",
-      description = "Click here for delete this table",
+      title = "Excluir mesa",
+      description = "Clique aqui para excluir esta mesa.",
       icon = 'trash',
       onSelect = function()
         table.remove(selectedJob.craftings, id)
         lib.notify({
-          title = "Deleted",
-          description = "Crafting table has been deleted",
+          title = "Sucesso",
+          description = "A mesa de fabricação foi excluída.",
           type = "success"
         })
         TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+        Wait(500)
+        EditCrafings()
       end
     })
 
     lib.registerContext({
       id = 'create_new_crafting_item',
       title = 'Novo item',
-      options = options
+      options = options,
+      menu = 'default',
+      onBack = function()
+        EditCrafings()
+      end,
     })
     lib.showContext("create_new_crafting_item")
   end
@@ -486,7 +672,7 @@ function EditCrafings()
     for i, crafting in pairs(selectedJob.craftings) do
       local newOption = {
         title = crafting.label,
-        description = "Click here for open crafting.",
+        description = "Clique aqui para editar o crafting.",
         icon = 'circle',
         onSelect = function()
           openCraftingTable(i)
@@ -496,8 +682,8 @@ function EditCrafings()
     end
 
     table.insert(options, {
-      title = "New table",
-      description = "Create new crafting table",
+      title = "Nova mesa de fabricação",
+      description = "Criar uma nova mesa de fabricação.",
       icon = "plus",
       onSelect = function()
         CreateCraftingTable()
@@ -506,8 +692,13 @@ function EditCrafings()
 
     lib.registerContext({
       id = 'job_crafting_list',
-      title = selectedJob.label .. " - Crafting list",
-      options = options
+      title = "Crafting",
+      description = "Gerenciamento",
+      options = options,
+      menu = 'default',
+      onBack = function()
+        selectJob(selectedJob)
+      end,
     })
     lib.showContext("job_crafting_list")
   end
@@ -696,8 +887,8 @@ AddEventHandler("pls_jobsystem:client:createjob", function()
         }
       else
         grades[gradenumber] = {
-            name = _input[2],
-            payment = _input[3]
+          name = _input[2],
+          payment = _input[3]
         }
       end
     else
@@ -742,17 +933,17 @@ function EditCraftingItem()
     end
     local options = {
       {
-        title = "Contar: " .. count,
+        title = "Quantidade: " .. count,
         description = "Isso é o que o jogador recebe",
         icon = 'hashtag',
         onSelect = function()
           print(selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].itemCount)
-          local input = lib.inputDialog('Change count', { 'Enter number' })
+          local input = lib.inputDialog('Alterar quantidade', { 'Digite a quantidade:' })
           if input then
             selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].itemCount = tonumber(input[1])
             TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
-            openCraftingTable(cached.crafting_table_id)
           end
+          EditCraftingItem()
         end
       },
       {
@@ -762,8 +953,8 @@ function EditCraftingItem()
         onSelect = function()
           if selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].animation then
             local alert = lib.alertDialog({
-              header = 'Animation clear',
-              content = 'This clear animation! ( The default will be used / config.lua )',
+              header = 'Animação excluída',
+              content = 'Essa animação foi redefinida aos padrões.',
               centered = true,
               cancel = true
             })
@@ -772,7 +963,7 @@ function EditCraftingItem()
               TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
             end
           else
-            local input = lib.inputDialog('Crafting animation', { 'Anim', "Dict" })
+            local input = lib.inputDialog('Editar Animação', { 'Anim', "Dict" })
             if input then
               selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].animation = {
                 anim = input
@@ -782,45 +973,57 @@ function EditCraftingItem()
               TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
             end
           end
-          openCraftingTable(cached.crafting_table_id)
+          EditCraftingItem()
         end,
       }
     }
     for ingedienceId, v in pairs(selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].ingedience) do
       table.insert(options, {
         title = items[v.itemName].label .. " - x" .. v.itemCount,
-        description = "Click here for change count",
+        description = "Clique aqui para mudar a quantidade",
+        image = Config.DirectoryToInventoryImages .. v.itemName .. ".png",
         icon = 'circle',
         onSelect = function()
-          local input = lib.inputDialog('Change count', { 'Enter number' })
+          local input = lib.inputDialog('Alterar quantidade', { 'Quantidade:' })
           if input then
             selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].ingedience[ingedienceId].itemCount =
                 tonumber(input[1])
             TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
-            openCraftingTable(cached.crafting_table_id)
           end
+          EditCraftingItem()
         end,
       })
     end
     table.insert(options, {
-      title = "Delete item",
-      description = "Click here for delete this item from crafting",
+      title = "Excluir item",
+      description = "Clique aqui para excluir este item da mesa de fabricação",
       icon = 'trash',
       onSelect = function()
+        local alert = lib.alertDialog({
+          header = 'Item excluído',
+          content = 'O item foi excluído da mesa de fabricação.',
+          centered = true,
+          cancel = true
+        })
+        if alert ~= "confirm" then return EditCraftingItem() end
         table.remove(selectedJob.craftings[cached.crafting_table_id].items, cached.crafting_item_id)
         TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
         openCraftingTable(cached.crafting_table_id)
         lib.notify({
-          title = "Deleted",
-          description = "Item has been deleted",
+          title = "Sucesso",
+          description = "O item foi excluído",
           type = "success"
         })
       end,
     })
     lib.registerContext({
       id = 'create_new_crafting_item',
-      title = 'Item de Crafting',
-      options = options
+      title = 'Gerenciar Item',
+      options = options,
+      menu = 'default',
+      onBack = function()
+        openCraftingTable(cached.crafting_table_id)
+      end,
     })
     lib.showContext("create_new_crafting_item")
   end
@@ -843,7 +1046,8 @@ AddEventHandler("pls_jobsystem:client:openJobMenu", function(Jobs)
     end
     lib.registerContext({
       id = 'job_menu_open',
-      title = 'Trabalhos e Gangues',
+      title = 'Gerenciamento',
+      description = 'Trabalhos e Facções',
       menu = 'menu_jobs',
       options = options
     })

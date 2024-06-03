@@ -48,7 +48,7 @@ local function generateCrafting(craftItems)
               end
               if lib.progressCircle({
                     duration = 10000,
-                    label = 'Você está se preparando ' .. items[k.itemName].label,
+                    label = 'Fabricando ' .. items[k.itemName].label,
                     position = 'bottom',
                     useWhileDead = false,
                     canCancel = true,
@@ -65,7 +65,7 @@ local function generateCrafting(craftItems)
               end
             else
               lib.notify({
-                title = "Job",
+                title = "Erro",
                 description = "Você não tem todos os itens!",
                 type = "error"
               })
@@ -94,7 +94,7 @@ local function openCashRegister(job)
         {
           name = 'balance',
           icon = 'fa-solid fa-dollar',
-          title = "Balance: " .. cashBalance,
+          title = "Saldo: R$" .. cashBalance,
         },
         {
           name = 'withdraw',
