@@ -221,6 +221,35 @@ local function selectJob(jobData)
         end,
       },
       {
+        title = "Local para Bater Ponto",
+        description = "Status: " .. AddonsExists(selectedJob.duty),
+        icon = 'clock',
+        onSelect = function()
+          if selectedJob.duty then
+            local alert = lib.alertDialog({
+              header = "Excluir o local de Bater Ponto",
+              content = "Você realmente quer excluir?",
+              centered = true,
+              cancel = true
+            })
+            if alert == "confirm" then
+              selectedJob.duty = nil
+              TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+            end
+            Wait(500)
+            selectJob(jobData)
+          else
+            local coords = CreateNewCraftingPoint()
+            if coords then
+              selectedJob.duty = coords
+              TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+            end
+            Wait(500)
+            selectJob(jobData)
+          end
+        end
+      },
+      {
         title = "Caixa registradora",
         description = "Status: " .. AddonsExists(selectedJob.register),
         icon = 'dollar',

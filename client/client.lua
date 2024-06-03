@@ -163,6 +163,36 @@ local function GenerateCraftings()
       table.insert(Targets, targetId)
     end
 
+    ------- ON DUTY
+    if job.duty then
+      local DutyRegister = BRIDGE.AddSphereTarget({
+        coords = vector3(job.duty.x, job.duty.y, job.duty.z),
+        options = {
+          {
+            name = 'bell',
+            icon = 'fa-solid fa-circle',
+            label = "Bater ponto",
+            -- groups = job.job,
+            onSelect = function(data)
+              local jobname = BRIDGE.GetPlayerJob()
+              if jobname == job.job then
+                TriggerServerEvent("QBCore:ToggleDuty")
+              else
+                lib.notify({
+                  title = "Você não tem permissão",
+                  description = "Você não pode usar isso.",
+                  type = "error"
+                })
+              end
+            end
+          },
+        },
+        debug = false,
+        radius = 0.2,
+      })
+      table.insert(Targets, DutyRegister)
+    end
+
     ------- CASH REGISTER
 
     if job.register then
