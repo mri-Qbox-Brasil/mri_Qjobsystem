@@ -29,8 +29,8 @@ local function generateCrafting(craftItems)
       end
       table.insert(options,
         {
-          title = items[k.itemName].label .. " - " .. count .. " ks",
-          icon = 'hand',
+          title = items[k.itemName].label .. " - " .. count .. " x",
+          icon = Config.DirectoryToInventoryImages .. k.itemName .. ".png",
           image = Config.DirectoryToInventoryImages .. k.itemName .. ".png",
           onSelect = function()
             local hasAllItems = true
@@ -77,7 +77,8 @@ local function generateCrafting(craftItems)
     end
     lib.registerContext({
       id = "job_system_crafting",
-      title = "Jobs",
+      title = "Fabricação",
+      description = "Crie seus itens aqui!",
       options = options
     })
     lib.showContext("job_system_crafting")
@@ -140,8 +141,8 @@ local function GenerateCraftings()
         options = {
           {
             name = 'sphere',
-            icon = 'fa-solid fa-circle',
-            label = crafting.label,
+            icon = 'fa-solid fa-screwdriver-wrench',
+            label = string.format("Abrir %s", crafting.label),
             -- groups = job.job,
             onSelect = function(data)
               local jobname = BRIDGE.GetPlayerJob()
@@ -170,7 +171,7 @@ local function GenerateCraftings()
         options = {
           {
             name = 'bell',
-            icon = 'fa-solid fa-circle',
+            icon = 'fa-solid fa-briefcase',
             label = "Bater ponto",
             -- groups = job.job,
             onSelect = function(data)
