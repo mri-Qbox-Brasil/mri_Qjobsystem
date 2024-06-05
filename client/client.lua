@@ -143,10 +143,11 @@ local function GenerateCraftings()
             name = 'sphere',
             icon = 'fa-solid fa-screwdriver-wrench',
             label = string.format("Abrir %s", crafting.label),
-            -- groups = job.job,
             onSelect = function(data)
               local jobname = BRIDGE.GetPlayerJob()
-              if jobname == job.job then
+              local gangname = BRIDGE.GetPlayerGang()
+
+              if jobname == job.job or gangname == job.job then
                 generateCrafting(crafting.items)
               else
                 lib.notify({
@@ -173,7 +174,6 @@ local function GenerateCraftings()
             name = 'bell',
             icon = 'fa-solid fa-briefcase',
             label = "Bater ponto",
-            -- groups = job.job,
             onSelect = function(data)
               local jobname = BRIDGE.GetPlayerJob()
               if jobname == job.job then
@@ -204,10 +204,11 @@ local function GenerateCraftings()
             name = 'bell',
             icon = 'fa-solid fa-circle',
             label = "Caixa registradora",
-            -- groups = job.job,
             onSelect = function(data)
               local jobname = BRIDGE.GetPlayerJob()
-              if jobname == job.job then
+              local gangname = BRIDGE.GetPlayerGang()
+
+              if jobname == job.job or gangname == job.job then
                 openCashRegister(job.job)
               else
                 lib.notify({
@@ -234,7 +235,6 @@ local function GenerateCraftings()
             name = 'bell',
             icon = 'fa-solid fa-circle',
             label = "Alarme",
-            -- groups = job.job,
             onSelect = function(data)
               local jobname = BRIDGE.GetPlayerJob()
               if jobname == job.job then
@@ -271,16 +271,10 @@ local function GenerateCraftings()
             name = 'bell',
             icon = 'fa-solid fa-laptop',
             label = "Boss menu",
-            -- groups = job.job,
             onSelect = function(data)
-              local jobname
-              if job.type == "job" then
-                jobname = BRIDGE.GetPlayerJob()
-              elseif job.type == "gang" then
-                jobname = BRIDGE.GetPlayerGang()
-              end
-              print(json.encode(jobname), job.job)
-              if jobname == job.job then
+              local jobname = BRIDGE.GetPlayerJob()
+              local gangname = BRIDGE.GetPlayerGang()
+              if jobname == job.job or gangname == job.job then
                 openBossmenu(job.type)
               else
                 lib.notify({
@@ -307,11 +301,11 @@ local function GenerateCraftings()
               name = stash.id,
               icon = 'fa-solid fa-boxes-stacked',
               label = stash.label,
-              -- groups = job.job,
               onSelect = function(data)
                 if stash.job then
                   local jobname = BRIDGE.GetPlayerJob()
-                  if jobname == job.job then
+                  local gangname = BRIDGE.GetPlayerGang()
+                  if jobname == job.job or gangname == job.job then
                     BRIDGE.OpenStash(stash.id, stash.weight, stash.slots)
                   else
                     lib.notify({

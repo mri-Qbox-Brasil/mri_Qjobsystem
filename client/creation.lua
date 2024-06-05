@@ -204,22 +204,7 @@ local function selectJob(jobData)
           OpenJobsGrades(jobData)
         end,
       },
-      {
-        title = "Tamanho da área: " .. selectedJob.area,
-        description = "Clique aqui para mudar o tamanho da área do grupo. ",
-        icon = 'expand',
-        onSelect = function()
-          local input = lib.inputDialog('Editar Área',
-            {
-              { type = 'number', label = 'Tamanho', description = 'Essa é a área onde os NPCs, báus e craftings podem ser criados.', min = 10, max = 100 },
-            })
-          if not input then return selectJob(jobData) end
-          selectedJob.area = input[1]
-          TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
-          Wait(500)
-          selectJob(jobData)
-        end,
-      },
+
       {
         title = "Local para Bater Ponto",
         description = "Status: " .. AddonsExists(selectedJob.duty),
@@ -364,6 +349,7 @@ local function selectJob(jobData)
         title = "Excluir grupo",
         description = "Clique aqui para excluir este grupo.",
         icon = 'trash',
+        iconColor = 'red',
         onSelect = function()
           local alert = lib.alertDialog({
             header = 'Excluir o grupo: ' .. selectedJob.label,
@@ -447,7 +433,46 @@ function OpenJobsGrades(jobData)
   selectedJob = jobData
   print(json.encode(jobData))
   local options = {}
+  if jobData.type == 'job' then
+  options[#options + 1] = {
+    title = "Editar Tipo",
+    description = "Clique aqui para editar o tipo de trabalho.",
+    icon = 'edit',
+    onSelect = function()
+      
+        local input_options = Config.jobTypeList
+        local input_type = lib.inputDialog('Configurações de Trabalho', {
+          {
+            type = 'select',
+            label = 'Tipo de trabalho',
+            description =
+            "leo = policiais, ems = paramédicos, mechanic = mecânicos, etc. Marque sem tipo caso não se aplique.",
+            options = input_options,
+            default = (jobData.jobtype or "Nenhum"),
+            required = true,
+            searchable = true,
+            clearable = true
+          }
+        })
+        if not input_type then return OpenJobsGrades(jobData) end
+        if input_type ~= 'Nenhum' then
+          jobData.jobtype = input_type[1]
+        else
+          jobData.jobtype = nil
+        end
 
+        TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+        lib.notify({
+          title = "Atualizado",
+          description = "Tipo de cargo alterado para " .. (jobData.jobtype or "Nenhum"),
+          type = "success"
+        })
+        Wait(500)
+        return OpenJobsGrades(jobData)
+      end
+    } 
+  end
+    
   options[#options + 1] = {
     title = "Criar cargo",
     description = "Clique aqui para criar um cargo.",
@@ -814,19 +839,19 @@ function EditPeds()
     for i, ped in pairs(selectedJob.peds) do
       local newOption = {
         title = ped.label,
-        description = "Click here for edit ped",
+        description = "Clique aqui para editar PED",
         icon = 'circle',
         onSelect = function()
           local options = {
             {
-              title = "Delete ped",
-              description = "Click here for delete ped.",
+              title = "Excluir Ped",
+              description = "Clique aqui para excluir PED.",
               icon = 'trash',
               onSelect = function()
                 table.remove(selectedJob.peds, i)
                 lib.notify({
-                  title = "Deleted",
-                  description = "Ped deleted!",
+                  title = "Excluída",
+                  description = "Ped excluído!",
                   type = "success"
                 })
                 TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
@@ -870,7 +895,6 @@ AddEventHandler("pls_jobsystem:client:createjob", function()
     {
       { type = 'input',  label = 'Título',          description = 'Qual o Título do grupo?',                                                                         required = true,  min = 4,  max = 16 },
       { type = 'input',  label = 'Código do grupo', description = 'Coloque por exemplo: police, ballas, etc.',                                                       required = true,  min = 1,  max = 16 },
-      { type = 'number', label = 'Área',            description = 'Tamanho da área do grupo. Para aparecer os peds, carregar targets e outros eventos necessários.', icon = 'hashtag', min = 10, max = 100 },
       {
         type = 'select',
         label = 'Tipo',
@@ -886,28 +910,43 @@ AddEventHandler("pls_jobsystem:client:createjob", function()
   newJob.label = input[1]
   newJob.coords = GetEntityCoords(cache.ped)
   newJob.job = input[2]
-  newJob.area = tonumber(input[3])
-  newJob.type = input[4]
+  newJob.type = input[3]
+
+  if input[3] == 'job' then
+    local input_options = Config.jobTypeList
+    local input_type = lib.inputDialog('Job: Configurações adicionais', {
+      {
+        type = 'select',
+        label = 'Tipo de trabalho',
+        description =
+        "leo = policiais, ems = paramédicos, mechanic = mecânicos, etc. Marque sem tipo caso não se aplique.",
+        options = input_options
+      }
+    })
+    if not input_type then return end
+    if input_type ~= 'none' then
+      newJob.jobtype = input_type[1]
+    end
+  end
 
   local grades = {}
 
-  for i = 1, input[5] do
+  for i = 1, input[4] do
     local options = {
       { type = 'number', label = 'Código do cargo', description = 'Qual o Código do cargo?', required = true, default = i - 1, disabled = true },
       { type = 'input',  label = 'Nome do cargo',   description = 'Qual o nome do cargo?',   required = true },
     }
-    if input[4] == 'job' then
+    if input[3] == 'job' then
       options[#options + 1] = { type = 'number', label = 'Salário', description = 'Qual o Salário do cargo?', required = true, min = 0, max = 1000000 }
     end
 
-    local _input = lib.inputDialog('Criação de Cargos', options)
+    local _input = lib.inputDialog(string.format('Criação de Cargos [%s]', i - 1), options)
     if not _input then return end
     local gradenumber = tonumber(_input[1])
-    print(gradenumber)
     if not gradenumber then gradenumber = i - 1 end
 
     if _input[3] then
-      if i == input[5] then
+      if i == input[4] then
         grades[gradenumber] = {
           name = _input[2],
           payment = _input[3],
@@ -921,7 +960,7 @@ AddEventHandler("pls_jobsystem:client:createjob", function()
         }
       end
     else
-      if i == input[5] then
+      if i == input[4] then
         grades[gradenumber] = {
           name = _input[2],
           isboss = true,
@@ -936,21 +975,24 @@ AddEventHandler("pls_jobsystem:client:createjob", function()
   end
 
   newJob.grades = grades
+  
+  TriggerSecureEvent("pls_jobsystem:server:saveNewJob", newJob)
+  Wait(500)
+  ExecuteCommand("open_jobs")
 
+  -- local alert = lib.alertDialog({
+  --   header = 'Criação de Craftings',
+  --   content = 'Deseja criar um local de fabricação agora ou depois? ',
+  --   centered = true,
+  --   cancel = true
+  -- })
 
-  local alert = lib.alertDialog({
-    header = 'Criação de Craftings',
-    content = 'Deseja criar um local de fabricação agora ou depois? ',
-    centered = true,
-    cancel = true
-  })
-
-  if alert == "confirm" then
-    selectedJob = newJob
-    CreateCraftingTable()
-  else
-    TriggerSecureEvent("pls_jobsystem:server:saveNewJob", newJob)
-  end
+  -- if alert == "confirm" then
+  --   selectedJob = newJob
+  --   CreateCraftingTable()
+  -- else
+  --   TriggerSecureEvent("pls_jobsystem:server:saveNewJob", newJob)
+  -- end
 end)
 
 
@@ -1065,7 +1107,7 @@ AddEventHandler("pls_jobsystem:client:openJobMenu", function(Jobs)
     for _, job in pairs(Jobs) do
       local newOption = {
         title = job.label .. " - " .. job.job,
-        description = 'Craftings ' .. #job.craftings .. " / Area: " .. job.area,
+        description = 'Craftings ' .. #job.craftings,
         icon = 'circle',
         onSelect = function()
           selectJob(job)
