@@ -266,7 +266,7 @@ local function selectJob(jobData)
       {
         title = "Alarme",
         description = "Status: " .. AddonsExists(selectedJob.alarm),
-        icon = 'bell',
+        icon = "fa-solid fa-bell",
         onSelect = function()
           if selectedJob.alarm then
             local alert = lib.alertDialog({
