@@ -42,6 +42,7 @@ local function LoadJobs(isStarting)
         if job.type == "job" then
             dataJobs[job.job] = {
                 label = job.label,
+                type = job.jobtype,
                 defaultDuty = true,
                 offDutyPay = false,
                 grades = decodeGrades(job.grades),

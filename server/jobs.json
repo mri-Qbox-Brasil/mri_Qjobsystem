@@ -1,1 +1,75 @@
-[{"type":"job","balance":2001,"duty":{"x":452.6276550292969,"z":30.10904884338379,"y":-976.2214965820313},"jobtype":"leo","grades":{"0":{"name":"Recruta","payment":500},"3":{"name":"Chefe","bankAuth":true,"isboss":true,"payment":555},"2":{"name":"Tenente","payment":500},"1":{"name":"Soldado","payment":200}},"label":"LSPD","bossmenu":{"x":447.3981018066406,"z":30.43862152099609,"y":-974.0276489257813},"job":"police","craftings":[{"coords":{"x":449.4537048339844,"z":30.3753662109375,"y":-978.1087646484376},"label":"Algemas","id":"police0_5055","items":[{"ingedience":[{"itemName":"plastic","itemCount":3},{"itemName":"garbage","itemCount":2}],"itemName":"handcuffs","itemCount":10}]}],"coords":{"x":447.1144104003906,"z":30.68960189819336,"y":-979.2796020507813},"stashes":[{"job":true,"id":"police0_9123","label":"Baú da Polícia","weight":500000,"coords":{"x":452.0380554199219,"z":30.63170433044433,"y":-972.8811645507813},"slots":50}],"alarm":{"x":148.6542510986328,"z":29.49523544311523,"y":-1036.444091796875}}]
+[
+  {
+    "type": "job",
+    "balance": 2001,
+    "duty": {
+      "x": 452.6276550292969,
+      "z": 30.10904884338379,
+      "y": -976.2214965820313
+    },
+    "jobtype": "leo",
+    "grades": {
+      "0": { "name": "Recruta", "payment": 500 },
+      "3": {
+        "name": "Chefe",
+        "bankAuth": true,
+        "isboss": true,
+        "payment": 555
+      },
+      "2": { "name": "Tenente", "payment": 500 },
+      "1": { "name": "Soldado", "payment": 200 }
+    },
+    "label": "LSPD",
+    "bossmenu": {
+      "x": 447.3981018066406,
+      "z": 30.43862152099609,
+      "y": -974.0276489257813
+    },
+    "job": "police",
+    "craftings": [
+      {
+        "coords": {
+          "x": 449.4537048339844,
+          "z": 30.3753662109375,
+          "y": -978.1087646484376
+        },
+        "label": "Algemas",
+        "id": "police0_5055",
+        "items": [
+          {
+            "ingedience": [
+              { "itemName": "plastic", "itemCount": 3 },
+              { "itemName": "garbage", "itemCount": 2 }
+            ],
+            "itemName": "handcuffs",
+            "itemCount": 10
+          }
+        ]
+      }
+    ],
+    "coords": {
+      "x": 447.1144104003906,
+      "z": 30.68960189819336,
+      "y": -979.2796020507813
+    },
+    "stashes": [
+      {
+        "job": true,
+        "id": "police0_9123",
+        "label": "Baú da Polícia",
+        "weight": 500000,
+        "coords": {
+          "x": 452.0380554199219,
+          "z": 30.63170433044433,
+          "y": -972.8811645507813
+        },
+        "slots": 50
+      }
+    ],
+    "alarm": {
+      "x": 148.6542510986328,
+      "z": 29.49523544311523,
+      "y": -1036.444091796875
+    }
+  }
+]
