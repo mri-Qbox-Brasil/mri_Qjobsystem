@@ -65,7 +65,7 @@ local function CreateCraftingTable()
     if selectedJob.craftings then
       local input = lib.inputDialog('Criação de Crafting',
         {
-          { type = 'input', label = 'Label', description = 'Adicionar rótulo da mesa de fabricação', required = true, min = 4, max = 32 },
+          { type = 'input', label = 'Label', description = 'Adicionar rótulo da mesa de fabricação', required = true, min = 1, max = 32 },
         })
       if not input then return end
       table.insert(selectedJob.craftings, {
@@ -100,7 +100,7 @@ local function CreateNewStash()
   if coords then
     local input = lib.inputDialog('Criação de Baú',
       {
-        { type = 'input',  label = 'Nome',  description = 'Nome do baú',               required = true, min = 4, max = 32 },
+        { type = 'input',  label = 'Nome',  description = 'Nome do baú',               required = true, min = 1, max = 32 },
         { type = 'number', label = 'Slots', description = 'Quantos slots terá o baú?', required = true },
         { type = 'number', label = 'Peso',  description = 'Peso máximo em gramas',     required = true },
         {
@@ -144,7 +144,7 @@ end
 local function CreateNewPed()
   local input = lib.inputDialog('Create ped',
     {
-      { type = 'input', label = 'Label',          description = 'Ped name',             required = true,  min = 4, max = 32 },
+      { type = 'input', label = 'Label',          description = 'Ped name',             required = true,  min = 1, max = 32 },
       { type = 'input', label = 'Ped model',      description = 'Enter ped model',      required = true,  min = 0, max = 64 },
       { type = 'input', label = 'Animation',      description = 'Enter animation',      required = false, min = 0, max = 64 },
       { type = 'input', label = 'Animation DICT', description = 'Enter animation dict', required = false, min = 0, max = 64 },
@@ -187,7 +187,7 @@ local function selectJob(jobData)
         onSelect = function()
           local input = lib.inputDialog('Editar nome',
             {
-              { type = 'input', label = 'Nome', description = 'Coloque algum nome para este grupo.', required = true, min = 4, max = 16 },
+              { type = 'input', label = 'Nome', description = 'Coloque algum nome para este grupo.', required = true, min = 1, max = 32 },
             })
           if not input then return selectJob(jobData) end
           selectedJob.label = input[1]
@@ -479,7 +479,7 @@ function OpenJobsGrades(jobData)
     icon = 'plus',
     onSelect = function()
       local inputOptions = {
-        { type = 'input', label = 'Nome', description = 'Coloque algum nome para este cargo.', required = true, min = 4, max = 16 }
+        { type = 'input', label = 'Nome', description = 'Coloque algum nome para este cargo.', required = true, min = 1, max = 32 }
       }
 
       if jobData.type == 'job' then
@@ -576,7 +576,7 @@ function OpenJobsGrades(jobData)
       icon = 'circle',
       onSelect = function()
         local inputOptions = {
-          { type = 'input', label = 'Nome', description = 'Coloque algum nome para este cargo.', required = true, min = 4, max = 16, default = grade.name },
+          { type = 'input', label = 'Nome', description = 'Coloque algum nome para este cargo.', required = true, min = 1, max = 32, default = grade.name },
         }
 
         if jobData.type == 'job' then
@@ -893,8 +893,8 @@ AddEventHandler("pls_jobsystem:client:createjob", function()
   local newJob = Config.DefaultDataJob
   local input = lib.inputDialog('Criar um novo Grupo',
     {
-      { type = 'input',  label = 'Título',          description = 'Qual o Título do grupo?',                                                                         required = true,  min = 4,  max = 16 },
-      { type = 'input',  label = 'Código do grupo', description = 'Coloque por exemplo: police, ballas, etc.',                                                       required = true,  min = 1,  max = 16 },
+      { type = 'input',  label = 'Título',          description = 'Qual o Título do grupo?',                                                                         required = true,  min = 1,  max = 32 },
+      { type = 'input',  label = 'Código do grupo', description = 'Coloque por exemplo: police, ballas, etc.',                                                       required = true,  min = 1,  max = 32 },
       {
         type = 'select',
         label = 'Tipo',

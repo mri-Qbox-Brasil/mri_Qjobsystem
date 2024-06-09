@@ -340,19 +340,12 @@ local function GenerateCraftings()
   end
 end
 
-
-
-
-
-RegisterNetEvent("pls_jobsystem:client:receiveJobs")
-AddEventHandler("pls_jobsystem:client:receiveJobs", function(ServerJobs)
+RegisterNetEvent("pls_jobsystem:client:receiveJobs", function(ServerJobs)
   if Jobs then
     Jobs = ServerJobs
     GenerateCraftings()
   end
 end)
-
-
 
 RegisterNetEvent("pls_jobsystem:client:Pull")
 AddEventHandler("pls_jobsystem:client:Pull", function(ServerJobs)
@@ -364,8 +357,6 @@ AddEventHandler("pls_jobsystem:client:Pull", function(ServerJobs)
   Wait(100)
   GenerateCraftings()
 end)
-
-
 
 CreateThread(function()
   while true do

@@ -69,15 +69,12 @@ AddEventHandler('onResourceStart', function(resourceName)
     end
 end)
 
-RegisterNetEvent('QBCore:Server:OnPlayerLoaded', function()
-    if not source then return end
-    LoadJobs()
-    Wait(2000)
-    TriggerClientEvent("pls_jobsystem:client:receiveJobs", source, Jobs)
+RegisterServerEvent('QBCore:Server:OnPlayerLoaded', function()
+    LoadJobs(true)
 end)
 
 AddEventHandler(GetCurrentResourceName() .. ':playerLoaded', function(playerId)
-    LoadJobs()
+    LoadJobs(true)
     Wait(2000)
     TriggerClientEvent("pls_jobsystem:client:receiveJobs", playerId, Jobs)
 end)
