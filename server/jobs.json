@@ -1,75 +1,178 @@
 [
   {
-    "type": "job",
-    "balance": 2001,
-    "duty": {
-      "x": 452.6276550292969,
-      "z": 30.10904884338379,
-      "y": -976.2214965820313
-    },
-    "jobtype": "leo",
-    "grades": {
-      "0": { "name": "Recruta", "payment": 500 },
-      "3": {
-        "name": "Chefe",
-        "bankAuth": true,
-        "isboss": true,
-        "payment": 555
-      },
-      "2": { "name": "Tenente", "payment": 500 },
-      "1": { "name": "Soldado", "payment": 200 }
-    },
-    "label": "LSPD",
-    "bossmenu": {
-      "x": 447.3981018066406,
-      "z": 30.43862152099609,
-      "y": -974.0276489257813
-    },
-    "job": "police",
     "craftings": [
       {
         "coords": {
-          "x": 449.4537048339844,
           "z": 30.3753662109375,
+          "x": 449.4537048339844,
           "y": -978.1087646484376
         },
-        "label": "Algemas",
         "id": "police0_5055",
         "items": [
           {
-            "ingedience": [
-              { "itemName": "plastic", "itemCount": 3 },
-              { "itemName": "garbage", "itemCount": 2 }
-            ],
+            "itemCount": 10,
             "itemName": "handcuffs",
-            "itemCount": 10
+            "ingedience": [
+              { "itemCount": 3, "itemName": "plastic" },
+              { "itemCount": 2, "itemName": "garbage" }
+            ]
           }
-        ]
+        ],
+        "label": "Algemas"
       }
     ],
-    "coords": {
-      "x": 447.1144104003906,
-      "z": 30.68960189819336,
-      "y": -979.2796020507813
+    "type": "job",
+    "label": "Polícia",
+    "balance": 2001,
+    "grades": {
+      "2": { "payment": 500, "name": "Tenente" },
+      "3": {
+        "name": "Chefe",
+        "isboss": true,
+        "payment": 555,
+        "bankAuth": true
+      },
+      "0": { "payment": 500, "name": "Recruta" },
+      "1": { "payment": 200, "name": "Soldado" }
+    },
+    "jobtype": "leo",
+    "alarm": {
+      "z": 29.49523544311523,
+      "x": 148.6542510986328,
+      "y": -1036.444091796875
+    },
+    "duty": {
+      "z": 30.10904884338379,
+      "x": 452.6276550292969,
+      "y": -976.2214965820313
+    },
+    "bossmenu": {
+      "z": 30.43862152099609,
+      "x": 447.3981018066406,
+      "y": -974.0276489257813
     },
     "stashes": [
       {
+        "slots": 50,
+        "coords": {
+          "z": 30.63170433044433,
+          "x": 452.0380554199219,
+          "y": -972.8811645507813
+        },
         "job": true,
         "id": "police0_9123",
         "label": "Baú da Polícia",
-        "weight": 500000,
-        "coords": {
-          "x": 452.0380554199219,
-          "z": 30.63170433044433,
-          "y": -972.8811645507813
-        },
-        "slots": 50
+        "weight": 500000
       }
     ],
-    "alarm": {
-      "x": 148.6542510986328,
-      "z": 29.49523544311523,
-      "y": -1036.444091796875
+    "job": "police",
+    "coords": {
+      "z": 30.68960189819336,
+      "x": 447.1144104003906,
+      "y": -979.2796020507813
     }
+  },
+  {
+    "label": "Hospital",
+    "craftings": [],
+    "type": "job",
+    "coords": {
+      "z": 29.46170234680175,
+      "x": 413.5118713378906,
+      "y": -967.9647827148438
+    },
+    "job": "ambulance",
+    "grades": {
+      "2": {
+        "name": "Diretor",
+        "isboss": true,
+        "payment": 300,
+        "bankAuth": true
+      },
+      "0": { "payment": 100, "name": "Paramédico" },
+      "1": { "payment": 200, "name": "Médico" }
+    },
+    "jobtype": "ems",
+    "typejob": ""
+  },
+  {
+    "grades": {
+      "2": {
+        "name": "Gerente",
+        "isboss": true,
+        "payment": 300,
+        "bankAuth": true
+      },
+      "0": { "payment": 100, "name": "Aprendiz de Mecãnico" },
+      "1": { "payment": 200, "name": "Mecânico" }
+    },
+    "craftings": [],
+    "type": "job",
+    "coords": {
+      "z": 29.46170234680175,
+      "x": 413.5118713378906,
+      "y": -967.9647827148438
+    },
+    "job": "mechanic",
+    "typejob": "",
+    "jobtype": "mechanic",
+    "label": "Los Customs"
+  },
+  {
+    "label": "Ballas",
+    "craftings": [],
+    "type": "gang",
+    "coords": {
+      "z": 29.46170234680175,
+      "x": 413.5118713378906,
+      "y": -967.9647827148438
+    },
+    "job": "ballas",
+    "typejob": "",
+    "jobtype": "mechanic",
+    "grades": {
+      "2": { "name": "Líder", "isboss": true, "bankAuth": true },
+      "0": { "name": "Recruta" },
+      "1": { "name": "Membro" }
+    }
+  },
+  {
+    "typejob": "",
+    "craftings": [],
+    "type": "gang",
+    "coords": {
+      "z": 29.46170234680175,
+      "x": 413.5118713378906,
+      "y": -967.9647827148438
+    },
+    "job": "vaggos",
+    "grades": {
+      "2": { "name": "Líder", "isboss": true, "bankAuth": true },
+      "0": { "name": "Recruta" },
+      "1": { "name": "Membro" }
+    },
+    "jobtype": "mechanic",
+    "label": "Vaggos"
+  },
+  {
+    "label": "Imobiliária",
+    "craftings": [],
+    "type": "job",
+    "coords": {
+      "z": 29.46170234680175,
+      "x": 413.5118713378906,
+      "y": -967.9647827148438
+    },
+    "job": "realstate",
+    "grades": {
+      "0": {
+        "name": "Corretor de Imóveis",
+        "isboss": true,
+        "payment": 100,
+        "bankAuth": true
+      }
+    },
+    "jobtype": "realestate",
+    "typejob": ""
   }
 ]
