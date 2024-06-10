@@ -23,12 +23,20 @@ local function decodeGrades(grades)
 end
 
 local function LoadJobs(isStarting)
-    local loadFile = LoadResourceFile(GetCurrentResourceName(), "./server/jobs.json")
-    if not loadFile then
-        SaveResourceFile(GetCurrentResourceName(), "./server/jobs.json", json.encode({}), -1)
-        loadFile = {}
+    if isStarting then
+        DB.CreateTable()
     end
-    Jobs = json.decode(loadFile)
+    
+    local data = DB.FetchJobs()
+    if #data <= 0 then 
+        local loadFile = LoadResourceFile(GetCurrentResourceName(), "./server/jobs.json")
+        Jobs = json.decode(loadFile) or {}
+
+        DB.InsertJobs(Jobs)
+    else
+        Jobs = json.decode(data[1].jobs)
+    end
+    
     for _, job in pairs(Jobs) do
         if isStarting then
             if job.stashes then
@@ -80,8 +88,7 @@ AddEventHandler(GetCurrentResourceName() .. ':playerLoaded', function(playerId)
 end)
 
 local function SaveJobs()
-    SaveResourceFile(GetCurrentResourceName(), "./server/jobs.json", json.encode(Jobs), -1)
-    Wait(500)
+    DB.SaveJobs(Jobs)
     LoadJobs()
 end
 
