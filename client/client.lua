@@ -61,7 +61,7 @@ local function generateCrafting(craftItems)
                       clip = animData.anim
                     },
                   }) then
-                TriggerSecureEvent("pls_jobsystem:server:createItem", k)
+                TriggerSecureEvent("mri_Qjobsystem:server:createItem", k)
               end
             else
               lib.notify({
@@ -86,7 +86,7 @@ local function generateCrafting(craftItems)
 end
 
 local function openCashRegister(job)
-  local cashBalance = lib.callback.await('pls_jobsystem:server:getBalance', 100, job)
+  local cashBalance = lib.callback.await('mri_Qjobsystem:server:getBalance', 100, job)
   if cashBalance then
     lib.registerContext({
       id = "cash_register",
@@ -108,7 +108,7 @@ local function openCashRegister(job)
                 { type = 'number', label = 'Retirar', description = 'Quanto você quer retirar?', icon = 'hashtag', min = 1, },
               })
             if input then
-              TriggerSecureEvent("pls_jobsystem:server:makeRegisterAction", job, "withdraw", input[1])
+              TriggerSecureEvent("mri_Qjobsystem:server:makeRegisterAction", job, "withdraw", input[1])
             end
           end
         },
@@ -123,7 +123,7 @@ local function openCashRegister(job)
                 { type = 'number', label = 'Depósito', description = 'Quanto você deseja depósito', icon = 'hashtag', min = 1, },
               })
             if input then
-              TriggerSecureEvent("pls_jobsystem:server:makeRegisterAction", job, "deposit", input[1])
+              TriggerSecureEvent("mri_Qjobsystem:server:makeRegisterAction", job, "deposit", input[1])
             end
           end
         },
@@ -340,15 +340,15 @@ local function GenerateCraftings()
   end
 end
 
-RegisterNetEvent("pls_jobsystem:client:receiveJobs", function(ServerJobs)
+RegisterNetEvent("mri_Qjobsystem:client:receiveJobs", function(ServerJobs)
   if Jobs then
     Jobs = ServerJobs
     GenerateCraftings()
   end
 end)
 
-RegisterNetEvent("pls_jobsystem:client:Pull")
-AddEventHandler("pls_jobsystem:client:Pull", function(ServerJobs)
+RegisterNetEvent("mri_Qjobsystem:client:Pull")
+AddEventHandler("mri_Qjobsystem:client:Pull", function(ServerJobs)
   for _, tid in pairs(Targets) do
     BRIDGE.RemoveSphereTarget(tid)
   end

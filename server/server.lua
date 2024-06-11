@@ -26,7 +26,7 @@ local function LoadJobs(isStarting)
     if isStarting then
         DB.CreateTable()
     end
-    
+
     local data = DB.FetchJobs()
     if #data <= 0 then 
         local loadFile = LoadResourceFile(GetCurrentResourceName(), "./server/jobs.json")
@@ -66,7 +66,7 @@ local function LoadJobs(isStarting)
     end
     if isStarting then
         Wait(2000)
-        TriggerClientEvent("pls_jobsystem:client:receiveJobs", -1, Jobs)
+        TriggerClientEvent("mri_Qjobsystem:client:receiveJobs", -1, Jobs)
     end
 end
 
@@ -84,7 +84,7 @@ end)
 AddEventHandler(GetCurrentResourceName() .. ':playerLoaded', function(playerId)
     LoadJobs(true)
     Wait(2000)
-    TriggerClientEvent("pls_jobsystem:client:receiveJobs", playerId, Jobs)
+    TriggerClientEvent("mri_Qjobsystem:client:receiveJobs", playerId, Jobs)
 end)
 
 local function SaveJobs()
@@ -107,7 +107,7 @@ local function IsPlayerHasCustomPerms(playerId)
 end
 
 
-lib.callback.register('pls_jobsystem:server:getBalance', function(source, jobName)
+lib.callback.register('mri_Qjobsystem:server:getBalance', function(source, jobName)
     for _, job in pairs(Jobs) do
         if job.job == jobName then
             if not job.balance then
@@ -118,8 +118,8 @@ lib.callback.register('pls_jobsystem:server:getBalance', function(source, jobNam
     end
 end)
 
-RegisterNetEvent("pls_jobsystem:server:saveNewJob")
-AddEventHandler("pls_jobsystem:server:saveNewJob", function(jobData)
+RegisterNetEvent("mri_Qjobsystem:server:saveNewJob")
+AddEventHandler("mri_Qjobsystem:server:saveNewJob", function(jobData)
     local src = source
     if CanTrustPlayer(src) then
         if IsPlayerHasCustomPerms(src) then
@@ -148,8 +148,8 @@ AddEventHandler("pls_jobsystem:server:saveNewJob", function(jobData)
     end
 end)
 
-RegisterNetEvent("pls_jobsystem:server:saveJob")
-AddEventHandler("pls_jobsystem:server:saveJob", function(jobData)
+RegisterNetEvent("mri_Qjobsystem:server:saveJob")
+AddEventHandler("mri_Qjobsystem:server:saveJob", function(jobData)
     local src = source
     if CanTrustPlayer(src) then
         if IsPlayerHasCustomPerms(src) then
@@ -176,8 +176,8 @@ AddEventHandler("pls_jobsystem:server:saveJob", function(jobData)
     end
 end)
 
-RegisterNetEvent("pls_jobsystem:server:deleteJob")
-AddEventHandler("pls_jobsystem:server:deleteJob", function(jobData)
+RegisterNetEvent("mri_Qjobsystem:server:deleteJob")
+AddEventHandler("mri_Qjobsystem:server:deleteJob", function(jobData)
     local src = source
     if CanTrustPlayer(src) then
         if IsPlayerHasCustomPerms(src) then
@@ -206,8 +206,8 @@ end)
 
 
 
-RegisterNetEvent("pls_jobsystem:server:pullChanges")
-AddEventHandler("pls_jobsystem:server:pullChanges", function(pullType)
+RegisterNetEvent("mri_Qjobsystem:server:pullChanges")
+AddEventHandler("mri_Qjobsystem:server:pullChanges", function(pullType)
     local src = source
     if CanTrustPlayer(src) then
         if IsPlayerHasCustomPerms(src) then
@@ -221,17 +221,17 @@ AddEventHandler("pls_jobsystem:server:pullChanges", function(pullType)
                 end
             end
             if pullType == "creator" then
-                TriggerClientEvent("pls_jobsystem:client:Pull", src, Jobs)
+                TriggerClientEvent("mri_Qjobsystem:client:Pull", src, Jobs)
             elseif pullType == "all" then
-                TriggerClientEvent("pls_jobsystem:client:Pull", -1, Jobs)
+                TriggerClientEvent("mri_Qjobsystem:client:Pull", -1, Jobs)
             end
         end
     end
 end)
 
 
-RegisterNetEvent("pls_jobsystem:server:createItem")
-AddEventHandler("pls_jobsystem:server:createItem", function(craftingData)
+RegisterNetEvent("mri_Qjobsystem:server:createItem")
+AddEventHandler("mri_Qjobsystem:server:createItem", function(craftingData)
     local src = source
     if CanTrustPlayer(src) then
         if IsPlayerHasCustomPerms(src) then
@@ -257,8 +257,8 @@ AddEventHandler("pls_jobsystem:server:createItem", function(craftingData)
     end
 end)
 
-RegisterNetEvent("pls_jobsystem:server:makeRegisterAction")
-AddEventHandler("pls_jobsystem:server:makeRegisterAction", function(jobName, action, number)
+RegisterNetEvent("mri_Qjobsystem:server:makeRegisterAction")
+AddEventHandler("mri_Qjobsystem:server:makeRegisterAction", function(jobName, action, number)
     local src = source
     if CanTrustPlayer(src) then
         if IsJobExist(jobName) then
@@ -310,8 +310,8 @@ AddEventHandler("pls_jobsystem:server:makeRegisterAction", function(jobName, act
 end)
 
 
-RegisterNetEvent("pls_jobsystem:server:createBackup")
-AddEventHandler("pls_jobsystem:server:createBackup", function(pullType)
+RegisterNetEvent("mri_Qjobsystem:server:createBackup")
+AddEventHandler("mri_Qjobsystem:server:createBackup", function(pullType)
     local src = source
     if CanTrustPlayer(src) then
         SaveResourceFile(GetCurrentResourceName(), "./server/backup.json", json.encode(Jobs), -1)
@@ -325,8 +325,8 @@ end)
 
 
 
-RegisterNetEvent("pls_jobsystem:server:setBackup")
-AddEventHandler("pls_jobsystem:server:setBackup", function(pullType)
+RegisterNetEvent("mri_Qjobsystem:server:setBackup")
+AddEventHandler("mri_Qjobsystem:server:setBackup", function(pullType)
     local src = source
     if CanTrustPlayer(src) then
         local loadFile = LoadResourceFile(GetCurrentResourceName(), "./server/backup.json")
@@ -342,12 +342,12 @@ lib.addCommand('createjob', {
     help = 'Este comando cria jobs e gangs',
     restricted = 'group.admin'
 }, function(source, args, raw)
-    TriggerClientEvent("pls_jobsystem:client:createjob", source)
+    TriggerClientEvent("mri_Qjobsystem:client:createjob", source)
 end)
 
 lib.addCommand('open_jobs', {
     help = 'Este comando abre seu menu de jobs e gangs.',
     restricted = 'group.admin'
 }, function(source, args, raw)
-    TriggerClientEvent("pls_jobsystem:client:openJobMenu", source, Jobs)
+    TriggerClientEvent("mri_Qjobsystem:client:openJobMenu", source, Jobs)
 end)

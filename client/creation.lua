@@ -86,7 +86,7 @@ local function CreateCraftingTable()
       if alert == "confirm" then
         CreateCraftingTable()
       else
-        TriggerSecureEvent("pls_jobsystem:server:saveNewJob", selectedJob)
+        TriggerSecureEvent("mri_Qjobsystem:server:saveNewJob", selectedJob)
         Wait(500)
         EditCrafings()
       end
@@ -136,7 +136,7 @@ local function CreateNewStash()
       weight = input[3],
       job = limitedByJob,
     })
-    TriggerSecureEvent("pls_jobsystem:server:saveNewJob", selectedJob)
+    TriggerSecureEvent("mri_Qjobsystem:server:saveNewJob", selectedJob)
   end
 end
 
@@ -161,7 +161,7 @@ local function CreateNewPed()
     animAnim = input[3],
     animDict = input[4],
   })
-  TriggerSecureEvent("pls_jobsystem:server:saveNewJob", selectedJob)
+  TriggerSecureEvent("mri_Qjobsystem:server:saveNewJob", selectedJob)
 end
 
 local function AddonsExists(value)
@@ -191,7 +191,7 @@ local function selectJob(jobData)
             })
           if not input then return selectJob(jobData) end
           selectedJob.label = input[1]
-          TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+          TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
           Wait(500)
           selectJob(jobData)
         end,
@@ -219,7 +219,7 @@ local function selectJob(jobData)
             })
             if alert == "confirm" then
               selectedJob.duty = nil
-              TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+              TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
             end
             Wait(500)
             selectJob(jobData)
@@ -227,7 +227,7 @@ local function selectJob(jobData)
             local coords = CreateNewCraftingPoint()
             if coords then
               selectedJob.duty = coords
-              TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+              TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
             end
             Wait(500)
             selectJob(jobData)
@@ -248,7 +248,7 @@ local function selectJob(jobData)
             })
             if alert == "confirm" then
               selectedJob.register = nil
-              TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+              TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
             end
             Wait(500)
             selectJob(jobData)
@@ -256,7 +256,7 @@ local function selectJob(jobData)
             local coords = CreateNewCraftingPoint()
             if coords then
               selectedJob.register = coords
-              TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+              TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
             end
             Wait(500)
             selectJob(jobData)
@@ -277,7 +277,7 @@ local function selectJob(jobData)
             })
             if alert == "confirm" then
               selectedJob.alarm = nil
-              TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+              TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
             end
             Wait(500)
             selectJob(jobData)
@@ -285,7 +285,7 @@ local function selectJob(jobData)
             local coords = CreateNewCraftingPoint()
             if coords then
               selectedJob.alarm = coords
-              TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+              TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
             end
             Wait(500)
             selectJob(jobData)
@@ -306,7 +306,7 @@ local function selectJob(jobData)
             })
             if alert == "confirm" then
               selectedJob.bossmenu = nil
-              TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+              TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
             end
             Wait(500)
             selectJob(jobData)
@@ -314,7 +314,7 @@ local function selectJob(jobData)
             local coords = CreateNewCraftingPoint()
             if coords then
               selectedJob.bossmenu = coords
-              TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+              TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
             end
             Wait(500)
             selectJob(jobData)
@@ -358,7 +358,7 @@ local function selectJob(jobData)
             cancel = true
           })
           if alert == "confirm" then
-            TriggerSecureEvent("pls_jobsystem:server:deleteJob", selectedJob)
+            TriggerSecureEvent("mri_Qjobsystem:server:deleteJob", selectedJob)
           end
           Wait(500)
           ExecuteCommand("open_jobs")
@@ -369,7 +369,7 @@ local function selectJob(jobData)
         description = "Isso atualiza os empregos para você!",
         icon = 'arrow-up',
         onSelect = function()
-          TriggerSecureEvent("pls_jobsystem:server:pullChanges", "creator")
+          TriggerSecureEvent("mri_Qjobsystem:server:pullChanges", "creator")
           Wait(500)
           selectJob(jobData)
         end,
@@ -379,7 +379,7 @@ local function selectJob(jobData)
         description = "Isso atualiza os trabalhos para todos os jogadores no servidor!",
         icon = 'arrow-up',
         onSelect = function()
-          TriggerSecureEvent("pls_jobsystem:server:pullChanges", "all")
+          TriggerSecureEvent("mri_Qjobsystem:server:pullChanges", "all")
           Wait(500)
           selectJob(jobData)
         end,
@@ -395,7 +395,7 @@ local function selectJob(jobData)
               description = "Salvar novo backup, isso sobrescreve o backup que existir atualmetente.",
               icon = "plus",
               onSelect = function()
-                TriggerSecureEvent("pls_jobsystem:server:createBackup")
+                TriggerSecureEvent("mri_Qjobsystem:server:createBackup")
               end
             },
             {
@@ -411,7 +411,7 @@ local function selectJob(jobData)
                   cancel = true
                 })
                 if alert == "confirm" then
-                  TriggerSecureEvent("pls_jobsystem:server:setBackup")
+                  TriggerSecureEvent("mri_Qjobsystem:server:setBackup")
                 end
               end
             }
@@ -461,7 +461,7 @@ function OpenJobsGrades(jobData)
           jobData.jobtype = nil
         end
 
-        TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+        TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
         lib.notify({
           title = "Atualizado",
           description = "Tipo de cargo alterado para " .. (jobData.jobtype or "Nenhum"),
@@ -505,7 +505,7 @@ function OpenJobsGrades(jobData)
       }
 
       print(json.encode(selectedJob))
-      TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+      TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
       lib.notify({
         title = 'Cargo criado',
         description = 'O cargo foi criado com sucesso.',
@@ -542,7 +542,7 @@ function OpenJobsGrades(jobData)
       end
 
       selectedJob.grades = newGrades
-      TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+      TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
 
       print(json.encode(selectedJob))
 
@@ -597,7 +597,7 @@ function OpenJobsGrades(jobData)
           grade.payment = input[2]
         end
         grade.name = input[1]
-        TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+        TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
         Wait(500)
         OpenJobsGrades(jobData)
       end,
@@ -679,7 +679,7 @@ local function openCraftingTable(id)
             ingedience = defineIngedience
           }
           table.insert(selectedJob.craftings[id].items, newTable)
-          TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+          TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
           lib.notify({
             title = "Sucesso",
             description = "Parabéns! Nova receita criada.",
@@ -701,7 +701,7 @@ local function openCraftingTable(id)
           description = "A mesa de fabricação foi excluída.",
           type = "success"
         })
-        TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+        TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
         Wait(500)
         EditCrafings()
       end
@@ -780,7 +780,7 @@ function EditStashes()
                 local input = lib.inputDialog('Change stash ID', { 'Enter new ID/Name' })
                 if input then
                   stashes.id = input[1]
-                  TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+                  TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
                 end
               end
             }
@@ -797,7 +797,7 @@ function EditStashes()
                 description = "Stash deleted!",
                 type = "success"
               })
-              TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+              TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
             end
           }
           }
@@ -854,7 +854,7 @@ function EditPeds()
                   description = "Ped excluído!",
                   type = "success"
                 })
-                TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+                TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
               end
             }
           }
@@ -888,8 +888,8 @@ function EditPeds()
 end
 
 ---- EVENTS
-RegisterNetEvent("pls_jobsystem:client:createjob")
-AddEventHandler("pls_jobsystem:client:createjob", function()
+RegisterNetEvent("mri_Qjobsystem:client:createjob")
+AddEventHandler("mri_Qjobsystem:client:createjob", function()
   local newJob = Config.DefaultDataJob
   local input = lib.inputDialog('Criar um novo Grupo',
     {
@@ -976,7 +976,7 @@ AddEventHandler("pls_jobsystem:client:createjob", function()
 
   newJob.grades = grades
   
-  TriggerSecureEvent("pls_jobsystem:server:saveNewJob", newJob)
+  TriggerSecureEvent("mri_Qjobsystem:server:saveNewJob", newJob)
   Wait(500)
   ExecuteCommand("open_jobs")
 
@@ -991,7 +991,7 @@ AddEventHandler("pls_jobsystem:client:createjob", function()
   --   selectedJob = newJob
   --   CreateCraftingTable()
   -- else
-  --   TriggerSecureEvent("pls_jobsystem:server:saveNewJob", newJob)
+  --   TriggerSecureEvent("mri_Qjobsystem:server:saveNewJob", newJob)
   -- end
 end)
 
@@ -1012,7 +1012,7 @@ function EditCraftingItem()
           local input = lib.inputDialog('Alterar quantidade', { 'Digite a quantidade:' })
           if input then
             selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].itemCount = tonumber(input[1])
-            TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+            TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
           end
           EditCraftingItem()
         end
@@ -1031,7 +1031,7 @@ function EditCraftingItem()
             })
             if alert == "confirm" then
               selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].animation = nil
-              TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+              TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
             end
           else
             local input = lib.inputDialog('Editar Animação', { 'Anim', "Dict" })
@@ -1041,7 +1041,7 @@ function EditCraftingItem()
                     [1],
                 dict = input[2]
               }
-              TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+              TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
             end
           end
           EditCraftingItem()
@@ -1059,7 +1059,7 @@ function EditCraftingItem()
           if input then
             selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].ingedience[ingedienceId].itemCount =
                 tonumber(input[1])
-            TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+            TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
           end
           EditCraftingItem()
         end,
@@ -1078,7 +1078,7 @@ function EditCraftingItem()
         })
         if alert ~= "confirm" then return EditCraftingItem() end
         table.remove(selectedJob.craftings[cached.crafting_table_id].items, cached.crafting_item_id)
-        TriggerSecureEvent("pls_jobsystem:server:saveJob", selectedJob)
+        TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
         openCraftingTable(cached.crafting_table_id)
         lib.notify({
           title = "Sucesso",
@@ -1100,8 +1100,8 @@ function EditCraftingItem()
   end
 end
 
-RegisterNetEvent("pls_jobsystem:client:openJobMenu")
-AddEventHandler("pls_jobsystem:client:openJobMenu", function(Jobs)
+RegisterNetEvent("mri_Qjobsystem:client:openJobMenu")
+AddEventHandler("mri_Qjobsystem:client:openJobMenu", function(Jobs)
   if Jobs then
     local options = {}
     for _, job in pairs(Jobs) do
