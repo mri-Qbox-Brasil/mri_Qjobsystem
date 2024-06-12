@@ -7,7 +7,7 @@ local function AddNewPed(pedData)
   table.insert(Peds, pedData)
 end
 
-local function generateCrafting(craftItems)
+local function generateCrafting(craftItems, label, icon)
   local options = {}
   local metadata = {}
   if craftItems then
@@ -46,9 +46,10 @@ local function generateCrafting(craftItems)
                   animData = { anim = Config.DEFAULT_ANIM, dict = k.animation.dict }
                 end
               end
+              local label_progress = icon and "Fabricando" or "Comprando"
               if lib.progressCircle({
                     duration = 10000,
-                    label = 'Fabricando ' .. items[k.itemName].label,
+                    label = label_progress .. ' ' .. items[k.itemName].label,
                     position = 'bottom',
                     useWhileDead = false,
                     canCancel = true,
@@ -77,8 +78,8 @@ local function generateCrafting(craftItems)
     end
     lib.registerContext({
       id = "job_system_crafting",
-      title = "Fabricação",
-      description = "Crie seus itens aqui!",
+      title = label,
+      description = "Lista de itens",
       options = options
     })
     lib.showContext("job_system_crafting")
@@ -136,19 +137,23 @@ end
 local function GenerateCraftings()
   for _, job in pairs(Jobs) do
     for _, crafting in pairs(job.craftings) do
+      local craftinglabel = crafting.label
       local targetId = BRIDGE.AddSphereTarget({
         coords = vector3(crafting.coords.x, crafting.coords.y, crafting.coords.z),
         options = {
           {
             name = 'sphere',
-            icon = 'fa-solid fa-screwdriver-wrench',
+            icon = crafting.icon or 'fa-solid fa-screwdriver-wrench',
             label = string.format("Abrir %s", crafting.label),
             onSelect = function(data)
               local jobname = BRIDGE.GetPlayerJob()
               local gangname = BRIDGE.GetPlayerGang()
 
-              if jobname == job.job or gangname == job.job then
-                generateCrafting(crafting.items)
+              if crafting.public or (jobname == job.job) or (gangname == job.job) then
+                local icon = crafting.icon or 'fa-solid fa-screwdriver-wrench'
+                local type = (icon == 'fa-solid fa-screwdriver-wrench') and true or false
+
+                generateCrafting(crafting.items, craftinglabel, type)
               else
                 lib.notify({
                   title = "Você não tem permissão",

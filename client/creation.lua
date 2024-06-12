@@ -1,8 +1,8 @@
--- VARIABLES
+-- Variáveis
 local items = BRIDGE.GetItems()
 local selectedJob = {}
 
--- DEFINE ITEMS for lib select
+-- Definir itens para Ox Lib Select
 local item_select = {}
 local cached = {
   crafting_table_id = nil,
@@ -10,9 +10,8 @@ local cached = {
   crafting_ingredience_id = nil,
 }
 
-
--- FUNCTIONS
-local function IsBlacklistedString(text)
+-- FUNÇÕES
+local function isBlacklistedString(text)
   for _, v in pairs(Config.BlacklistedStrings) do
     if string.find(string.lower(text), string.lower(v)) then
       return true
@@ -21,9 +20,8 @@ local function IsBlacklistedString(text)
   return false
 end
 
-
 for _, v in pairs(items) do
-  if not IsBlacklistedString(v.name) then
+  if not isBlacklistedString(v.name) then
     table.insert(item_select, {
       label = string.format("%s (%s)", v.label, v.name),
       value = v.name,
@@ -31,11 +29,9 @@ for _, v in pairs(items) do
   end
 end
 
-
-
-local function CreateNewCraftingPoint()
+local function getRayCoords()
   lib.notify({
-    title = "Selecionar Local",
+    title = "Selecionar coordenadas",
     description = "Confirme pressionando [E]",
     type = "info",
     duration = 10000
@@ -59,32 +55,46 @@ local function CreateNewCraftingPoint()
   end
 end
 
-local function CreateCraftingTable()
-  local coords = CreateNewCraftingPoint()
+local function createCraftingTable()
+  local coords = getRayCoords()
   if coords then
     if selectedJob.craftings then
-      local input = lib.inputDialog('Criação de Crafting',
+      local input = lib.inputDialog('Criação de Crafting/Loja',
         {
-          { type = 'input', label = 'Label', description = 'Adicionar rótulo da mesa de fabricação', required = true, min = 1, max = 32 },
+          { type = 'input',    label = 'Label',      description = 'Adicionar rótulo',                                                               required = true, min = 1,        max = 32 },
+          {
+            type = 'select',
+            label = 'Ícone',
+            description = 'Escolha o ícone da loja/crafting',
+            options = {
+              { label = 'Crafting', value = 'fa-solid fa-screwdriver-wrench', icon = 'fa-solid fa-screwdriver-wrench' },
+              { label = 'Loja',     value = 'fa-solid fa-cart-shopping',      icon = 'fa-solid fa-cart-shopping' },
+            },
+            default = 'Crafting',
+            required = true
+          },
+          { type = 'checkbox', label = 'É pública?', description = 'Marque caso queira deixar pública ao invés de ser permitido apenas pelo grupo.', default = false, required = true }
         })
       if not input then return end
       table.insert(selectedJob.craftings, {
         id = selectedJob.job .. #selectedJob.craftings .. "_" .. math.random(1, 9999),
         label = input[1],
+        icon = input[2],
+        public = input[3],
         coords = coords,
         items = {
 
         }
       })
       local alert = lib.alertDialog({
-        header = 'Criação de crafting',
-        content = 'Criação feita! Você quer criar um novo ponto de artesanato?',
+        header = 'Criação de crafting/loja',
+        content = 'Sucesso! Você quer fazer outra loja/crafting?',
         centered = true,
         cancel = true
       })
 
       if alert == "confirm" then
-        CreateCraftingTable()
+        createCraftingTable()
       else
         TriggerSecureEvent("mri_Qjobsystem:server:saveNewJob", selectedJob)
         Wait(500)
@@ -94,9 +104,8 @@ local function CreateCraftingTable()
   end
 end
 
-
-local function CreateNewStash()
-  local coords = CreateNewCraftingPoint()
+local function createNewStash()
+  local coords = getRayCoords()
   if coords then
     local input = lib.inputDialog('Criação de Baú',
       {
@@ -140,14 +149,13 @@ local function CreateNewStash()
   end
 end
 
-
-local function CreateNewPed()
-  local input = lib.inputDialog('Create ped',
+local function createNewPed()
+  local input = lib.inputDialog('Crie Ped',
     {
-      { type = 'input', label = 'Label',          description = 'Ped name',             required = true,  min = 1, max = 32 },
-      { type = 'input', label = 'Ped model',      description = 'Enter ped model',      required = true,  min = 0, max = 64 },
-      { type = 'input', label = 'Animation',      description = 'Enter animation',      required = false, min = 0, max = 64 },
-      { type = 'input', label = 'Animation DICT', description = 'Enter animation dict', required = false, min = 0, max = 64 },
+      { type = 'input', label = 'Rótulo',                 description = 'Nome do ped',                     required = true,  min = 1, max = 32 },
+      { type = 'input', label = 'Modelo do Ped',          description = 'Digite o modelo PED',             required = true,  min = 0, max = 64 },
+      { type = 'input', label = 'Animação',               description = 'Digite a animação',               required = false, min = 0, max = 64 },
+      { type = 'input', label = 'Dicionário da Animação', description = 'Digite o dicionário da animação', required = false, min = 0, max = 64 },
     })
   if not input then return end
   if not selectedJob.peds then
@@ -164,7 +172,7 @@ local function CreateNewPed()
   TriggerSecureEvent("mri_Qjobsystem:server:saveNewJob", selectedJob)
 end
 
-local function AddonsExists(value)
+local function addonsExists(value)
   if value then
     return "Criado"
   else
@@ -207,7 +215,7 @@ local function selectJob(jobData)
 
       {
         title = "Local para Bater Ponto",
-        description = "Status: " .. AddonsExists(selectedJob.duty),
+        description = "Status: " .. addonsExists(selectedJob.duty),
         icon = 'clock',
         onSelect = function()
           if selectedJob.duty then
@@ -224,7 +232,7 @@ local function selectJob(jobData)
             Wait(500)
             selectJob(jobData)
           else
-            local coords = CreateNewCraftingPoint()
+            local coords = getRayCoords()
             if coords then
               selectedJob.duty = coords
               TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
@@ -236,7 +244,7 @@ local function selectJob(jobData)
       },
       {
         title = "Caixa registradora",
-        description = "Status: " .. AddonsExists(selectedJob.register),
+        description = "Status: " .. addonsExists(selectedJob.register),
         icon = 'dollar',
         onSelect = function()
           if selectedJob.register then
@@ -253,7 +261,7 @@ local function selectJob(jobData)
             Wait(500)
             selectJob(jobData)
           else
-            local coords = CreateNewCraftingPoint()
+            local coords = getRayCoords()
             if coords then
               selectedJob.register = coords
               TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
@@ -265,7 +273,7 @@ local function selectJob(jobData)
       },
       {
         title = "Alarme",
-        description = "Status: " .. AddonsExists(selectedJob.alarm),
+        description = "Status: " .. addonsExists(selectedJob.alarm),
         icon = "fa-solid fa-bell",
         onSelect = function()
           if selectedJob.alarm then
@@ -282,7 +290,7 @@ local function selectJob(jobData)
             Wait(500)
             selectJob(jobData)
           else
-            local coords = CreateNewCraftingPoint()
+            local coords = getRayCoords()
             if coords then
               selectedJob.alarm = coords
               TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
@@ -294,7 +302,7 @@ local function selectJob(jobData)
       },
       {
         title = "Bossmenu",
-        description = "Status: " .. AddonsExists(selectedJob.bossmenu),
+        description = "Status: " .. addonsExists(selectedJob.bossmenu),
         icon = 'laptop',
         onSelect = function()
           if selectedJob.bossmenu then
@@ -311,7 +319,7 @@ local function selectJob(jobData)
             Wait(500)
             selectJob(jobData)
           else
-            local coords = CreateNewCraftingPoint()
+            local coords = getRayCoords()
             if coords then
               selectedJob.bossmenu = coords
               TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
@@ -322,8 +330,8 @@ local function selectJob(jobData)
         end,
       },
       {
-        title = "Craftings",
-        description = "Clique aqui para abrir o menu de crafting.",
+        title = "Craftings/Lojas",
+        description = "Clique aqui para abrir o menu de criar crafting/lojas.",
         icon = 'box',
         onSelect = function()
           EditCrafings()
@@ -434,12 +442,11 @@ function OpenJobsGrades(jobData)
   print(json.encode(jobData))
   local options = {}
   if jobData.type == 'job' then
-  options[#options + 1] = {
-    title = "Editar Tipo",
-    description = "Clique aqui para editar o tipo de trabalho.",
-    icon = 'edit',
-    onSelect = function()
-      
+    options[#options + 1] = {
+      title = "Editar Tipo",
+      description = "Clique aqui para editar o tipo de trabalho.",
+      icon = 'edit',
+      onSelect = function()
         local input_options = Config.jobTypeList
         local input_type = lib.inputDialog('Configurações de Trabalho', {
           {
@@ -470,9 +477,9 @@ function OpenJobsGrades(jobData)
         Wait(500)
         return OpenJobsGrades(jobData)
       end
-    } 
+    }
   end
-    
+
   options[#options + 1] = {
     title = "Criar cargo",
     description = "Clique aqui para criar um cargo.",
@@ -504,7 +511,6 @@ function OpenJobsGrades(jobData)
         payment = input[2],
       }
 
-      print(json.encode(selectedJob))
       TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
       lib.notify({
         title = 'Cargo criado',
@@ -639,7 +645,7 @@ local function openCraftingTable(id)
     end
     table.insert(options, {
       title = "Crie um novo item",
-      description = "Crie um novo item para esta mesa de fabricação.",
+      description = "Crie um novo item para vender ou fabricar.",
       icon = 'plus',
       onSelect = function()
         local input = lib.inputDialog('Selecione Item e Ingredientes', {
@@ -656,7 +662,8 @@ local function openCraftingTable(id)
           {
             type = 'multi-select',
             label = "Itens necessários",
-            placeholder = "Quais itens serão necessários para fabricar o item principal?",
+            placeholder =
+            "Quais itens serão necessários para fabricar o item principal? Coloque money se for loja por exemplo.",
             description = "Required",
             required = true,
             options = item_select,
@@ -682,7 +689,7 @@ local function openCraftingTable(id)
           TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
           lib.notify({
             title = "Sucesso",
-            description = "Parabéns! Nova receita criada.",
+            description = "Parabéns! Criado com sucesso.",
             type = "success"
           })
           openCraftingTable(cached.crafting_table_id)
@@ -690,26 +697,98 @@ local function openCraftingTable(id)
       end,
     })
 
-    table.insert(options, {
+    local icon = selectedCrafting.icon or 'fa-solid fa-screwdriver-wrench'
+    local type = (icon == 'fa-solid fa-screwdriver-wrench') and 'Crafting' or 'Loja'
+
+    options[#options + 1] = {
+      title = "Editar ícone",
+      description = "Clique aqui para editar.",
+      icon = icon,
+      onSelect = function()
+        local options = {
+          {
+            label = 'Crafting',
+            value = 'fa-solid fa-screwdriver-wrench',
+            icon = 'fa-solid fa-screwdriver-wrench',
+          },
+          {
+            label = 'Loja',
+            value = 'fa-solid fa-shopping-cart',
+            icon = 'fa-solid fa-shopping-cart',
+          }
+        }
+        local input = lib.inputDialog('Icone', {
+          {
+            type = 'select',
+            label = "Icone",
+            placeholder = "Selecionar",
+            description = "Selecione um icone para a loja/crafting.",
+            required = true,
+            options = options,
+            searchable = true,
+            clearable = true,
+            default = icon
+          },
+        })
+        if not input then
+          return lib.notify({
+            title = "Negado",
+            description = "Operação cancelada.",
+            type = "error"
+          })
+        end
+        selectedCrafting.icon = input[1]
+        TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
+        Wait(500)
+        openCraftingTable(cached.crafting_table_id)
+        lib.notify({
+          title = "Sucesso",
+          description = "Loja/crafting foi salvo com sucesso.",
+          type = "success"
+        })
+      end
+    }
+
+    local public = selectedCrafting.public or false
+
+    options[#options + 1] = {
+      title = string.format("Modo público: %s", public and "Ativado" or "Desativado"),
+      description = "Clique aqui para ativar/desativar se essa loja ou crafting será pública ou apenas desse grupo.",
+      iconColor = public and 'green' or'red',
+      icon = public and 'fa-solid fa-toggle-on' or 'fa-solid fa-toggle-off',
+      onSelect = function()
+        selectedCrafting.public = not public
+        TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
+        Wait(500)
+        openCraftingTable(cached.crafting_table_id)
+        lib.notify({
+          title = "Sucesso",
+          description = "Loja/crafting foi salvo com sucesso.",
+          type = "success"
+        })
+      end
+    }
+
+    options[#options + 1] = {
       title = "Excluir mesa",
-      description = "Clique aqui para excluir esta mesa.",
+      description = "Clique aqui para excluir.",
       icon = 'trash',
       onSelect = function()
         table.remove(selectedJob.craftings, id)
         lib.notify({
           title = "Sucesso",
-          description = "A mesa de fabricação foi excluída.",
+          description = "Loja/crafting foi excluído com sucesso.",
           type = "success"
         })
         TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
         Wait(500)
         EditCrafings()
       end
-    })
+    }
 
     lib.registerContext({
       id = 'create_new_crafting_item',
-      title = 'Novo item',
+      title = 'Gerenciar',
       options = options,
       menu = 'default',
       onBack = function()
@@ -724,10 +803,13 @@ function EditCrafings()
   if selectedJob then
     local options = {}
     for i, crafting in pairs(selectedJob.craftings) do
+      local icon = crafting.icon or 'fa-solid fa-screwdriver-wrench'
+      local type = (icon == 'fa-solid fa-screwdriver-wrench') and 'Crafting' or 'Loja'
+
       local newOption = {
-        title = crafting.label,
-        description = "Clique aqui para editar o crafting.",
-        icon = 'circle',
+        title = string.format("[%s] %s", type, crafting.label),
+        description = "Clique aqui para editar.",
+        icon = icon,
         onSelect = function()
           openCraftingTable(i)
         end,
@@ -735,19 +817,19 @@ function EditCrafings()
       table.insert(options, newOption)
     end
 
-    table.insert(options, {
-      title = "Nova mesa de fabricação",
-      description = "Criar uma nova mesa de fabricação.",
+    options[#options + 1] = {
+      title = "Novo crafting/loja",
+      description = "Criar um novo crafting/loja.",
       icon = "plus",
       onSelect = function()
-        CreateCraftingTable()
+        createCraftingTable()
       end
-    })
+    }
 
     lib.registerContext({
       id = 'job_crafting_list',
-      title = "Crafting",
-      description = "Gerenciamento",
+      title = "Gerenciamento",
+      description = "Craftings e Lojas",
       options = options,
       menu = 'default',
       onBack = function()
@@ -817,7 +899,7 @@ function EditStashes()
       description = "Create stash",
       icon = "plus",
       onSelect = function()
-        CreateNewStash()
+        createNewStash()
       end
     })
 
@@ -874,7 +956,7 @@ function EditPeds()
       description = "Create ped",
       icon = "plus",
       onSelect = function()
-        CreateNewPed()
+        createNewPed()
       end
     })
 
@@ -887,14 +969,117 @@ function EditPeds()
   end
 end
 
----- EVENTS
-RegisterNetEvent("mri_Qjobsystem:client:createjob")
-AddEventHandler("mri_Qjobsystem:client:createjob", function()
+function EditCraftingItem()
+  local count = 1
+  if cached.crafting_item_id then
+    if selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].itemCount then
+      count = selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].itemCount
+    end
+    local options = {
+      {
+        title = "Quantidade: " .. count,
+        description = "Isso é o que o jogador recebe",
+        icon = 'hashtag',
+        onSelect = function()
+          print(selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].itemCount)
+          local input = lib.inputDialog('Alterar quantidade', { 'Digite a quantidade:' })
+          if input then
+            selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].itemCount = tonumber(input[1])
+            TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
+          end
+          EditCraftingItem()
+        end
+      },
+      {
+        title = "Mude a animação",
+        description = "Clique aqui para mudar de animação!",
+        icon = 'hippo',
+        onSelect = function()
+          if selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].animation then
+            local alert = lib.alertDialog({
+              header = 'Animação excluída',
+              content = 'Essa animação foi redefinida aos padrões.',
+              centered = true,
+              cancel = true
+            })
+            if alert == "confirm" then
+              selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].animation = nil
+              TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
+            end
+          else
+            local input = lib.inputDialog('Editar Animação', { 'Anim', "Dict" })
+            if input then
+              selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].animation = {
+                anim = input
+                    [1],
+                dict = input[2]
+              }
+              TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
+            end
+          end
+          EditCraftingItem()
+        end,
+      }
+    }
+    for ingedienceId, v in pairs(selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].ingedience) do
+      table.insert(options, {
+        title = items[v.itemName].label .. " - x" .. v.itemCount,
+        description = "Clique aqui para mudar a quantidade",
+        image = Config.DirectoryToInventoryImages .. v.itemName .. ".png",
+        icon = 'circle',
+        onSelect = function()
+          local input = lib.inputDialog('Alterar quantidade', { 'Quantidade:' })
+          if input then
+            selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].ingedience[ingedienceId].itemCount =
+                tonumber(input[1])
+            TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
+          end
+          EditCraftingItem()
+        end,
+      })
+    end
+    table.insert(options, {
+      title = "Excluir item",
+      description = "Clique aqui para excluir este item",
+      icon = 'trash',
+      onSelect = function()
+        local alert = lib.alertDialog({
+          header = 'Item excluído',
+          content = 'O item foi excluído.',
+          centered = true,
+          cancel = true
+        })
+        if alert ~= "confirm" then return EditCraftingItem() end
+        table.remove(selectedJob.craftings[cached.crafting_table_id].items, cached.crafting_item_id)
+        TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
+        openCraftingTable(cached.crafting_table_id)
+        lib.notify({
+          title = "Sucesso",
+          description = "O item foi excluído",
+          type = "success"
+        })
+      end,
+    })
+    lib.registerContext({
+      id = 'create_new_crafting_item',
+      title = 'Gerenciar Item',
+      options = options,
+      menu = 'default',
+      onBack = function()
+        openCraftingTable(cached.crafting_table_id)
+      end,
+    })
+    lib.showContext("create_new_crafting_item")
+  end
+end
+
+---- EVENTOS
+RegisterNetEvent("mri_Qjobsystem:client:createjob", function()
   local newJob = Config.DefaultDataJob
   local input = lib.inputDialog('Criar um novo Grupo',
     {
-      { type = 'input',  label = 'Título',          description = 'Qual o Título do grupo?',                                                                         required = true,  min = 1,  max = 32 },
-      { type = 'input',  label = 'Código do grupo', description = 'Coloque por exemplo: police, ballas, etc.',                                                       required = true,  min = 1,  max = 32 },
+      { type = 'input', label = 'Título',          description = 'Qual o Título do grupo?',                   required = true, min = 1, max = 32 },
+      { type = 'input', label = 'Código do grupo', description = 'Coloque por exemplo: police, ballas, etc.', required = true, min = 1, max = 32 },
       {
         type = 'select',
         label = 'Tipo',
@@ -975,139 +1160,19 @@ AddEventHandler("mri_Qjobsystem:client:createjob", function()
   end
 
   newJob.grades = grades
-  
+
   TriggerSecureEvent("mri_Qjobsystem:server:saveNewJob", newJob)
   Wait(500)
   ExecuteCommand("open_jobs")
-
-  -- local alert = lib.alertDialog({
-  --   header = 'Criação de Craftings',
-  --   content = 'Deseja criar um local de fabricação agora ou depois? ',
-  --   centered = true,
-  --   cancel = true
-  -- })
-
-  -- if alert == "confirm" then
-  --   selectedJob = newJob
-  --   CreateCraftingTable()
-  -- else
-  --   TriggerSecureEvent("mri_Qjobsystem:server:saveNewJob", newJob)
-  -- end
 end)
 
-
-function EditCraftingItem()
-  local count = 1
-  if cached.crafting_item_id then
-    if selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].itemCount then
-      count = selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].itemCount
-    end
-    local options = {
-      {
-        title = "Quantidade: " .. count,
-        description = "Isso é o que o jogador recebe",
-        icon = 'hashtag',
-        onSelect = function()
-          print(selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].itemCount)
-          local input = lib.inputDialog('Alterar quantidade', { 'Digite a quantidade:' })
-          if input then
-            selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].itemCount = tonumber(input[1])
-            TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
-          end
-          EditCraftingItem()
-        end
-      },
-      {
-        title = "Mude a animação",
-        description = "Clique aqui para mudar de animação!",
-        icon = 'hippo',
-        onSelect = function()
-          if selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].animation then
-            local alert = lib.alertDialog({
-              header = 'Animação excluída',
-              content = 'Essa animação foi redefinida aos padrões.',
-              centered = true,
-              cancel = true
-            })
-            if alert == "confirm" then
-              selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].animation = nil
-              TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
-            end
-          else
-            local input = lib.inputDialog('Editar Animação', { 'Anim', "Dict" })
-            if input then
-              selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].animation = {
-                anim = input
-                    [1],
-                dict = input[2]
-              }
-              TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
-            end
-          end
-          EditCraftingItem()
-        end,
-      }
-    }
-    for ingedienceId, v in pairs(selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].ingedience) do
-      table.insert(options, {
-        title = items[v.itemName].label .. " - x" .. v.itemCount,
-        description = "Clique aqui para mudar a quantidade",
-        image = Config.DirectoryToInventoryImages .. v.itemName .. ".png",
-        icon = 'circle',
-        onSelect = function()
-          local input = lib.inputDialog('Alterar quantidade', { 'Quantidade:' })
-          if input then
-            selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].ingedience[ingedienceId].itemCount =
-                tonumber(input[1])
-            TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
-          end
-          EditCraftingItem()
-        end,
-      })
-    end
-    table.insert(options, {
-      title = "Excluir item",
-      description = "Clique aqui para excluir este item da mesa de fabricação",
-      icon = 'trash',
-      onSelect = function()
-        local alert = lib.alertDialog({
-          header = 'Item excluído',
-          content = 'O item foi excluído da mesa de fabricação.',
-          centered = true,
-          cancel = true
-        })
-        if alert ~= "confirm" then return EditCraftingItem() end
-        table.remove(selectedJob.craftings[cached.crafting_table_id].items, cached.crafting_item_id)
-        TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
-        openCraftingTable(cached.crafting_table_id)
-        lib.notify({
-          title = "Sucesso",
-          description = "O item foi excluído",
-          type = "success"
-        })
-      end,
-    })
-    lib.registerContext({
-      id = 'create_new_crafting_item',
-      title = 'Gerenciar Item',
-      options = options,
-      menu = 'default',
-      onBack = function()
-        openCraftingTable(cached.crafting_table_id)
-      end,
-    })
-    lib.showContext("create_new_crafting_item")
-  end
-end
-
-RegisterNetEvent("mri_Qjobsystem:client:openJobMenu")
-AddEventHandler("mri_Qjobsystem:client:openJobMenu", function(Jobs)
+RegisterNetEvent("mri_Qjobsystem:client:openJobMenu", function(Jobs)
   if Jobs then
     local options = {}
     for _, job in pairs(Jobs) do
       local newOption = {
         title = job.label .. " - " .. job.job,
-        description = 'Craftings ' .. #job.craftings,
+        description = 'Craftings/Lojas ' .. #job.craftings,
         icon = 'circle',
         onSelect = function()
           selectJob(job)
