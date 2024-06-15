@@ -1097,6 +1097,19 @@ RegisterNetEvent("mri_Qjobsystem:client:createjob", function()
   newJob.job = input[2]
   newJob.type = input[3]
 
+  local Jobs = exports.qbx_core:GetJobs()
+  print(json.encode(Jobs))
+  for k,v in pairs(Jobs) do
+    if k == newJob.job then
+      lib.notify({
+        title = "Erro",
+        description = "Já existe um grupo com esse nome",
+        type = "error"
+      })
+      return
+    end
+  end
+
   if input[3] == 'job' then
     local input_options = Config.jobTypeList
     local input_type = lib.inputDialog('Job: Configurações adicionais', {
