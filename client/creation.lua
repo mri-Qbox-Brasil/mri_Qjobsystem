@@ -1079,7 +1079,7 @@ RegisterNetEvent("mri_Qjobsystem:client:createjob", function()
   local input = lib.inputDialog('Criar um novo Grupo',
     {
       { type = 'input', label = 'Título',          description = 'Qual o Título do grupo?',                   required = true, min = 1, max = 32 },
-      { type = 'input', label = 'Código do grupo', description = 'Coloque por exemplo: police, ballas, etc.', required = true, min = 1, max = 32 },
+      { type = 'input', label = 'Código do grupo', description = 'Coloque por exemplo: police, ballas, etc. (SEMPRE EM MINÚSCULO)', required = true, min = 1, max = 32 },
       {
         type = 'select',
         label = 'Tipo',
@@ -1094,7 +1094,7 @@ RegisterNetEvent("mri_Qjobsystem:client:createjob", function()
   if not input then return end
   newJob.label = input[1]
   newJob.coords = GetEntityCoords(cache.ped)
-  newJob.job = input[2]
+  newJob.job = string.lower(input[2])
   newJob.type = input[3]
 
   local Jobs = exports.qbx_core:GetJobs()
