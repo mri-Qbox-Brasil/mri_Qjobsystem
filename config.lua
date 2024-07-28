@@ -8,7 +8,7 @@ Config.DefaultDataJob = {
     craftings = {}, -- TABLE
     type = "",
     grades = {},
-    typejob = "",
+    typejob = ""
 }
 
 Config.DEFAULT_ANIM = "hack_loop"
@@ -18,13 +18,22 @@ Config.BlacklistedStrings = {
     -- "weapon", "weed", "meth", "coke", "ammo", "gun", "pistol", "drug", "c4", "WEAPON", "AMMO", "at_", "keycard", "gun", "money", "black_money"
 }
 
-Config.jobTypeList = {
-    { value = 'leo',        label = 'Policiais (leo)' },
-    { value = 'ems',        label = 'Paramédicos (ems)' },
-    { value = 'mechanic',   label = 'Mecânicos (mechanic)' },
-    { value = 'realestate', label = 'Imobiliária (realestate)' },
-    { value = 'Nenhum',       label = 'Sem tipo' },
-}
+Config.jobTypeList = {{
+    value = 'leo',
+    label = 'Policiais (leo)'
+}, {
+    value = 'ems',
+    label = 'Paramédicos (ems)'
+}, {
+    value = 'mechanic',
+    label = 'Mecânicos (mechanic)'
+}, {
+    value = 'realestate',
+    label = 'Imobiliária (realestate)'
+}, {
+    value = 'Nenhum',
+    label = 'Sem tipo'
+}}
 
 Config.DirectoryToInventoryImages = "nui://ox_inventory/web/images/"
 
@@ -39,7 +48,7 @@ if not IS_SERVER then
         -- cache.ped
         print(coords)
         print(jobLabel)
-        local PoliceJobs = { 'police' }
+        local PoliceJobs = {'police'}
         exports["ps-dispatch"]:CustomAlert({
             coords = coords,
             job = PoliceJobs,
@@ -51,7 +60,7 @@ if not IS_SERVER then
             sprite = 161,
             color = 1,
             scale = 1.0,
-            length = 3,
+            length = 3
         })
     end
 end

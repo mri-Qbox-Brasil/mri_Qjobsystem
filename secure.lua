@@ -16,7 +16,10 @@ if IS_SERVER then
     AddEventHandler("secure:server:eventGen", function(randomString, password)
         local src = source
         if password == generatePass then
-            SecurePlayers[src] = {randomString = randomString, timeStamp = os.time()}
+            SecurePlayers[src] = {
+                randomString = randomString,
+                timeStamp = os.time()
+            }
         end
 
         -- Automaticky zrušit platnost po 6 vteřinách
@@ -25,10 +28,10 @@ if IS_SERVER then
         end)
     end)
 
-    RegisterNetEvent(SCRIPT_KEY_SERVER.."secure:server:eventCHECK")
-    AddEventHandler(SCRIPT_KEY_SERVER.."secure:server:eventCHECK", function()
+    RegisterNetEvent(SCRIPT_KEY_SERVER .. "secure:server:eventCHECK")
+    AddEventHandler(SCRIPT_KEY_SERVER .. "secure:server:eventCHECK", function()
         local src = source
-        TriggerClientEvent(SCRIPT_KEY_SERVER.."secure:get:password", src, generatePass)
+        TriggerClientEvent(SCRIPT_KEY_SERVER .. "secure:get:password", src, generatePass)
     end)
 
     function CanTrustPlayer(source)
@@ -39,29 +42,29 @@ if IS_SERVER then
             end
         end
         return false
-    end 
+    end
 end
 if not IS_SERVER then
     local SCRIPT_KEY_CLIENT = GetCurrentResourceName()
     local SERVER_PASSWORD
 
-    RegisterNetEvent(SCRIPT_KEY_CLIENT.."secure:get:password")
-    AddEventHandler(SCRIPT_KEY_CLIENT.."secure:get:password", function(password)
-       SERVER_PASSWORD = password
+    RegisterNetEvent(SCRIPT_KEY_CLIENT .. "secure:get:password")
+    AddEventHandler(SCRIPT_KEY_CLIENT .. "secure:get:password", function(password)
+        SERVER_PASSWORD = password
     end)
 
     function generateRandomString(length)
         local characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
         local result = ''
         local charactersLength = string.len(characters)
-    
+
         for i = 1, length do
             result = result .. string.sub(characters, math.random(1, charactersLength), 1)
         end
-    
+
         return result
     end
-    
+
     function TriggerSecureEvent(eventname, ...)
         local randomString = generateRandomString(10)
         TriggerServerEvent("secure:server:eventGen", randomString, SERVER_PASSWORD)
@@ -70,5 +73,5 @@ if not IS_SERVER then
     end
 
     Wait(1000)
-    TriggerServerEvent(SCRIPT_KEY_CLIENT.."secure:server:eventCHECK")
+    TriggerServerEvent(SCRIPT_KEY_CLIENT .. "secure:server:eventCHECK")
 end

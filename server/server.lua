@@ -28,7 +28,7 @@ local function LoadJobs(isStarting)
     end
 
     local data = DB.FetchJobs()
-    if #data <= 0 then 
+    if #data <= 0 then
         local loadFile = LoadResourceFile(GetCurrentResourceName(), "./server/jobs.json")
         Jobs = json.decode(loadFile) or {}
 
@@ -36,7 +36,7 @@ local function LoadJobs(isStarting)
     else
         Jobs = json.decode(data[1].jobs)
     end
-    
+
     for _, job in pairs(Jobs) do
         if isStarting then
             if job.stashes then
@@ -53,15 +53,19 @@ local function LoadJobs(isStarting)
                 type = job.jobtype,
                 defaultDuty = true,
                 offDutyPay = false,
-                grades = decodeGrades(job.grades),
+                grades = decodeGrades(job.grades)
             }
-            exports.qbx_core:CreateJobs({ [job.job] = dataJobs[job.job] })
+            exports.qbx_core:CreateJobs({
+                [job.job] = dataJobs[job.job]
+            })
         elseif job.type == "gang" then
             dataJobs[job.job] = {
                 label = job.label,
-                grades = decodeGrades(job.grades),
+                grades = decodeGrades(job.grades)
             }
-            exports.qbx_core:CreateGangs({ [job.job] = dataJobs[job.job] })
+            exports.qbx_core:CreateGangs({
+                [job.job] = dataJobs[job.job]
+            })
         end
     end
     if isStarting then
@@ -69,7 +73,6 @@ local function LoadJobs(isStarting)
         TriggerClientEvent("mri_Qjobsystem:client:receiveJobs", -1, Jobs)
     end
 end
-
 
 AddEventHandler('onResourceStart', function(resourceName)
     if (GetCurrentResourceName() == resourceName) then
@@ -105,7 +108,6 @@ local function IsPlayerHasCustomPerms(playerId)
     -- THIS IS FOR YOUR CUSTOM PERMS
     return true
 end
-
 
 lib.callback.register('mri_Qjobsystem:server:getBalance', function(source, jobName)
     for _, job in pairs(Jobs) do
@@ -204,8 +206,6 @@ AddEventHandler("mri_Qjobsystem:server:deleteJob", function(jobData)
     end
 end)
 
-
-
 RegisterNetEvent("mri_Qjobsystem:server:pullChanges")
 AddEventHandler("mri_Qjobsystem:server:pullChanges", function(pullType)
     local src = source
@@ -228,7 +228,6 @@ AddEventHandler("mri_Qjobsystem:server:pullChanges", function(pullType)
         end
     end
 end)
-
 
 RegisterNetEvent("mri_Qjobsystem:server:createItem")
 AddEventHandler("mri_Qjobsystem:server:createItem", function(craftingData)
@@ -309,7 +308,6 @@ AddEventHandler("mri_Qjobsystem:server:makeRegisterAction", function(jobName, ac
     end
 end)
 
-
 RegisterNetEvent("mri_Qjobsystem:server:createBackup")
 AddEventHandler("mri_Qjobsystem:server:createBackup", function(pullType)
     local src = source
@@ -323,8 +321,6 @@ AddEventHandler("mri_Qjobsystem:server:createBackup", function(pullType)
     end
 end)
 
-
-
 RegisterNetEvent("mri_Qjobsystem:server:setBackup")
 AddEventHandler("mri_Qjobsystem:server:setBackup", function(pullType)
     local src = source
@@ -336,7 +332,6 @@ AddEventHandler("mri_Qjobsystem:server:setBackup", function(pullType)
         end
     end
 end)
-
 
 lib.addCommand('createjob', {
     help = 'Este comando cria jobs e gangs',
