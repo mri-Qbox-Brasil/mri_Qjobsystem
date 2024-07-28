@@ -83,8 +83,7 @@ local function createCraftingTable()
                 type = 'checkbox',
                 label = 'É pública?',
                 description = 'Marque caso queira deixar pública ao invés de ser permitido apenas pelo grupo.',
-                default = false,
-                required = true
+                default = false
             }})
             if not input then
                 return
