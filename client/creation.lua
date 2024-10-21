@@ -658,7 +658,23 @@ function OpenJobsGrades(jobData)
         table.insert(options, newOption)
     end
     table.sort(options, function(a, b)
-        return a.title < b.title
+        -- Tenta extrair o número dentro de [] no título (captura o número entre os colchetes)
+        local aIndex = tonumber(string.match(a.title, "%[(%d+)%]"))
+        local bIndex = tonumber(string.match(b.title, "%[(%d+)%]"))
+
+        -- Se ambos `a` e `b` têm índices numéricos, ordena pelos números nos colchetes
+        if aIndex and bIndex then
+            return aIndex < bIndex
+        -- Se `a` tem número e `b` não, coloca `b` (botão) antes
+        elseif aIndex and not bIndex then
+            return false
+        -- Se `b` tem número e `a` não, coloca `a` (botão) antes
+        elseif bIndex and not aIndex then
+            return true
+        -- Se nenhum tem número, mantém a ordem original (botões entre si)
+        else
+            return false
+        end
     end)
 
     lib.registerContext({
