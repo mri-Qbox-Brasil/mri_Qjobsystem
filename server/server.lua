@@ -346,3 +346,77 @@ lib.addCommand('open_jobs', {
 }, function(source, args, raw)
     TriggerClientEvent("mri_Qjobsystem:client:openJobMenu", source, Jobs)
 end)
+
+----------------- updateJobGradePermission
+
+    lib.callback.register('mri_Qjobsystem:server:updateJobGradePermission', function(source, data, propName, key, maiorIndice)
+        print("vamos att?")
+        local jobEncontrado = nil
+            jobEncontrado = data
+        if not jobEncontrado then
+            lib.notify(source, {
+                description = 'Erro ao tentar alterar cargo, entre em contato com a Administração.',
+                type = 'error',
+                duration = 3000
+            })
+            return data
+        end
+
+        -- Verifica se o jogador está tentando alterar o chefe supremo "boss"
+        if propName == "isboss" and tostring(maiorIndice) == key then
+            lib.notify(source, {
+                description = 'Você não pode alterar o cargo do Líder.',
+                type = 'error',
+                duration = 3600
+            })
+            return data
+        end
+        -- Atualiza a permissão no job.grades
+        jobEncontrado[propName] = not (jobEncontrado[propName] or false)
+        data[propName] = jobEncontrado[propName]
+
+                for i, jobGradeItem in pairs(Jobs) do
+                    if jobGradeItem.label == data.label then
+                        jobGradeItem.grades[key][propName] = data[propName]
+                    break end
+                end
+
+        -- Salva as mudanças no sistema
+        DB.SaveJobs(Jobs)
+        LoadJobs(true)
+
+        lib.notify(source, {
+            description = 'Cargo atualizado com sucesso!',
+            type = 'success',
+            duration = 3600
+        })
+
+        -- Verifica se é necessário atualizar o playerJob no Qbcore onde só tem isboss, logo isrecruiter não é necessário atualizar
+        if propName == "isrecruiter" then
+            return data
+        end
+        -- Otimiza a busca pelos jogadores no grupo
+
+        local groupEntries = DB.FetchPlayersInGroup(data.groupName, data.groupType, tonumber(key))
+            if next(groupEntries) == nil then
+                return data
+            end
+        -- Atualiza os jogadores de acordo com o grupo se tiver jogadores no grupo + Cargo selecionado.
+        local setPlayerFunction
+        if data.groupType == 'job' then
+            setPlayerFunction = function(playerID, groupName)
+                exports.qbx_core:SetPlayerPrimaryJob(playerID, groupName)
+            end
+        else
+            setPlayerFunction = function(playerID, groupName)
+                exports.qbx_core:SetPlayerPrimaryGang(playerID, groupName)
+            end
+        end
+        -- Chamando o Qbcore para atualizar o playerIsboss
+        for i = 1, #groupEntries do
+            local playerID = groupEntries[i].citizenid
+            setPlayerFunction(playerID, data.groupName)
+            Wait(80)
+        end
+        return data
+    end)
