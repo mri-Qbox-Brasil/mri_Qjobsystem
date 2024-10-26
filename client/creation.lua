@@ -1295,3 +1295,112 @@ RegisterNetEvent("mri_Qjobsystem:client:openJobMenu", function(Jobs)
         lib.showContext("job_menu_open")
     end
 end)
+-----------------------------
+----------------------- Permission menu
+-----------------------------------------------------
+local function setGradeManagement(propName, callback, key, maiorIndice, jobGrade)
+    local result = lib.callback.await('mri_Qjobsystem:server:updateJobGradePermission', false, jobGrade, propName, key, maiorIndice)       
+        currentPlayerJob.grades[key][propName] = result[propName]
+    return callback(key, jobGrade.groupType, result)
+end
+local function ifThen(condition, ifTrue, ifFalse)
+    if condition then
+        return ifTrue
+    end
+    return ifFalse
+end
+
+local function menuObj(title, modifier, callback, propName, key, maiorIndice, jobGrade)
+    return {
+        title = title,
+        description = 'Ativa / Desativa permissão ' .. title .. ' para este cargo',
+        ifThen(modifier, "Ativo", "Inativo"),
+        icon = ifThen(modifier, "toggle-on", "toggle-off"),
+        iconAnimation = "fade",
+        iconColor = ifThen(modifier, ColorScheme.success, ColorScheme.danger),
+        onSelect = function()
+            setGradeManagement(propName, callback, key, maiorIndice, jobGrade)
+        end
+    }
+end
+
+local function gfxMenu(key, groupType, jobGrade)   
+    -- Calcula o maior índice para pegar o ultimo cargo - boss
+    local maiorIndice = -1
+    
+    for gradeIndex in pairs(currentPlayerJob.grades) do
+        local numIndex = tonumber(gradeIndex)
+        if numIndex and numIndex > maiorIndice then
+            maiorIndice = numIndex
+        end
+    end
+
+    -- Verifica o nível atual do jogador
+    local playerGradeLevel = QBX.PlayerData[groupType].grade.level
+
+    -- Define as opções do menu com base no nível do jogador
+    local menuOptions
+    if playerGradeLevel == maiorIndice then
+        -- Se o jogador for o chefe supremo, mostra todas as opções
+        menuOptions = {menuObj("Chefe", jobGrade["isboss"], gfxMenu, 'isboss', key, maiorIndice, jobGrade),
+                       menuObj("Recrutador", jobGrade["isrecruiter"], gfxMenu, 'isrecruiter', key, maiorIndice, jobGrade)}
+    else
+        -- Se o jogador não for o chefe, mostra apenas a opção de Recrutador
+        menuOptions = {menuObj("Recrutador", jobGrade["isrecruiter"], gfxMenu, 'isrecruiter', key, maiorIndice, jobGrade)}
+    end
+    local ctx = {
+        id = "gfxMenu",
+        menu = 'jobGradeMenu',
+        title = locale(currentPlayerJob.grades[key]["name"]),
+        description = locale('Gerenciar ' .. currentPlayerJob.grades[key]["name"]),
+        options = menuOptions
+    }
+
+    lib.registerContext(ctx)
+    lib.showContext(ctx.id)
+end
+--------------- Open menu
+local function jobGradeMenu(groupType)
+    local jobGradeMenuItems = {}
+    local groupName = QBX.PlayerData[groupType].name
+    local groupLabel = QBX.PlayerData[groupType].label
+    currentPlayerJob = {}
+
+    for i, jobson in pairs(Jobs) do
+        if jobson.label == groupLabel then
+            currentPlayerJob = jobson
+        break end
+    end
+
+    local jobGradeMenuItems = {}
+
+    for i, jobGrade in pairs(currentPlayerJob.grades) do
+            jobGrade.label = groupLabel
+            jobGrade.groupType = groupType
+            jobGradeMenuItems[#jobGradeMenuItems + 1] = {
+                title = '[' .. i .. '] ' .. jobGrade["name"],
+                onSelect = function()                  
+                    gfxMenu(i, groupType, jobGrade)
+                end
+            }
+    end
+
+    jobGradeMenuItems = exports.mri_Qjobsystem:SortByTitleIndex(jobGradeMenuItems)
+    
+    local ctx = {
+        id = 'jobGradeMenu',
+        menu = 'openBossMenu',
+        title = "Gerenciar permissões dos cargos",
+        options = jobGradeMenuItems
+    }
+    lib.registerContext(ctx)
+    lib.showContext(ctx.id)
+end
+
+RegisterNetEvent("mri_Qjobsystem:client:jobGradeMenu", function(args)
+    jobGradeMenu(args.type)
+end)
+
+RegisterNetEvent("onResourceStop", function()
+    RemoveManagementItems()
+end)
