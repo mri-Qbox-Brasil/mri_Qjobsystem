@@ -18,3 +18,11 @@ function DB.CreateTable()
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
     ]])
 end
+
+---@alias GroupType 'gang' | 'job'
+---@param name string
+---@param type GroupType
+---@return {citizenid: string, grade: integer}[]
+function DB.FetchPlayersInGroup(name, type, grade)
+    return MySQL.query.await("SELECT citizenid, grade FROM player_groups WHERE `group` = ? AND `type` = ? AND `grade` = ?", {name, type, grade})
+end
