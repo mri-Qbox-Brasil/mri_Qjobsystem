@@ -3,7 +3,6 @@ local GANGS
 local PlayerData
 
 function CheckPlayerIsbossByJobSystemData(groupType, data)
-    print('qual o player data? ' .. json.encode(data))
     JOBS = exports.qbx_core:GetJobs()
     GANGS = exports.qbx_core:GetGangs()
     PlayerData = data
@@ -20,7 +19,6 @@ end
 exports('CheckPlayerIsbossByJobSystemData', CheckPlayerIsbossByJobSystemData)
 
 function CheckPlayerIrecruiterByJobSystemData(groupType, data)
-    print('qual o player data? ' .. json.encode(data))
     JOBS = exports.qbx_core:GetJobs()
     GANGS = exports.qbx_core:GetGangs()
     PlayerData = data
