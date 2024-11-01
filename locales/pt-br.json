@@ -1,0 +1,8 @@
+{
+    "menu": {
+        "manage_permissions": "Gerenciar Permissões",
+        "manage_gang_permissions": "Gerenciar Permissões da Gangue",
+        "manage_job_permissions": "Gerenciar permissões dos cargos",
+        "manage_gang_job_permissions": "Gerenciar permissões dos cargos da gangue"
+    }
+}
