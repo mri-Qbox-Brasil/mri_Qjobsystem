@@ -2,6 +2,42 @@
 local items = BRIDGE.GetItems()
 local selectedJob = {}
 
+--- Permission Menu
+local menuIDs = {
+    Gang = nil,
+    Boss = nil
+}
+
+function RemoveManagementItems()
+    if GetResourceState("qbx_management") ~= "started" then
+        return
+    end
+
+    if menuIDs.Boss then
+        exports["qbx_management"]:RemoveBossMenuItem(menuIDs.Boss)
+    end
+    if menuIDs.Gang then
+        exports["qbx_management"]:RemoveGangMenuItem(menuIDs.Gang)
+    end
+end
+
+function AddManagementItens()
+    local menuItem = {
+        event = "mri_Qjobsystem:client:jobGradeMenu",
+        icon = 'clipboard',
+        args = {}
+    }
+    menuItem["title"] = locale('menu.manage_permissions')
+    menuItem["description"] = locale('menu.manage_job_permissions')
+    menuItem["args"].type = "job"
+    menuIDs.Boss = exports["qbx_management"]:AddBossMenuItem(menuItem)
+
+    menuItem["title"] = locale('menu.manage_gang_permissions')
+    menuItem["description"] = locale('menu.manage_gang_job_permissions')
+    menuItem["args"].type = "gang"
+    menuIDs.Gang = exports["qbx_management"]:AddGangMenuItem(menuItem)
+end
+
 -- Definir itens para Ox Lib Select
 local item_select = {}
 local cached = {
