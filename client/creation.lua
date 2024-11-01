@@ -1,4 +1,5 @@
 -- Variáveis
+ColorScheme = GlobalState.UIColors or {}
 local items = BRIDGE.GetItems()
 local selectedJob = {}
 

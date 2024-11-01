@@ -5,16 +5,20 @@ game 'gta5'
 
 description 'mri Qbox - Jobs and Gangs System'
 credits 'Polisek'
+ox_lib "locale"
 
-shared_scripts { 
+shared_scripts {
+    '@qbx_core/modules/playerdata.lua',
     'BRIDGE/config.lua',
     'BRIDGE/server/framework.lua',
     'config.lua',
     'secure.lua',
-    '@ox_lib/init.lua', 
+    '@ox_lib/init.lua',
+    'client/utilities.lua',
 }
 
 client_scripts {
+    '@qbx_core/modules/playerdata.lua',
     'BRIDGE/client/inventory.lua',
     'BRIDGE/client/target.lua',
 	'client/*.lua',
@@ -32,4 +36,8 @@ dependencies {
     'ox_lib',
     'oxmysql',
     'mri_Qbox'
+}
+
+files {
+    "locales/*.json"
 }

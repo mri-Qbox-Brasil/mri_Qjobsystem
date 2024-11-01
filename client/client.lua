@@ -1,4 +1,4 @@
-local Jobs = {}
+Jobs = {}
 local Targets = {}
 local Peds = {}
 local items = BRIDGE.GetItems()
@@ -344,10 +344,12 @@ local function GenerateCraftings()
 end
 
 RegisterNetEvent("mri_Qjobsystem:client:receiveJobs", function(ServerJobs)
-    if Jobs then
+    if ServerJobs then
         Jobs = ServerJobs
         GenerateCraftings()
     end
+    RemoveManagementItems()
+    AddManagementItens()
 end)
 
 RegisterNetEvent("mri_Qjobsystem:client:Pull")
