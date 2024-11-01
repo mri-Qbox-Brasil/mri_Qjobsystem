@@ -1330,8 +1330,9 @@ RegisterNetEvent("mri_Qjobsystem:client:openJobMenu", function(Jobs)
         })
         lib.showContext("job_menu_open")
     end
-        
- -----------------------------
+end)
+
+-----------------------------
 ----------------------- Permission menu
 -----------------------------------------------------
 local function setGradeManagement(propName, callback, key, maiorIndice, jobGrade)
@@ -1441,7 +1442,4 @@ end)
 
 RegisterNetEvent("onResourceStop", function()
     RemoveManagementItems()
-end)
-
-
 end)
