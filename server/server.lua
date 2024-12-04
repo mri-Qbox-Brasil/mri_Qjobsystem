@@ -46,6 +46,34 @@ local function LoadJobs(isStarting)
             else
                 job.stashes = {}
             end
+            
+            Citizen.CreateThread(function()
+                for k, v in pairs(job.craftings) do
+                    local shopItems = {}
+            
+                    for _, item in ipairs(v.items) do
+                        print(json.encode(item))
+                        table.insert(shopItems, {
+                            name = item.itemName,
+                            price = item.ingedience[1].itemCount, 
+                            currency = item.ingedience[1].itemName,
+                            count = item.stockAmount,
+                            license = item.license,
+                            metadata = item.metadata,
+                            grade = item.grade
+                        })
+                    end
+
+                    -- print(json.encode(shopItems))
+            
+                    exports.ox_inventory:RegisterShop(v.id, {
+                        name = v.label,
+                        inventory = shopItems,
+                    })
+            
+                end
+            end)
+                       
         end
         if job.type == "job" then
             dataJobs[job.job] = {
@@ -80,7 +108,7 @@ AddEventHandler('onResourceStart', function(resourceName)
     end
 end)
 
-RegisterServerEvent('QBCore:Server:OnPlayerLoaded', function()
+RegisterNetEvent('QBCore:Server:OnPlayerLoaded', function()
     LoadJobs(true)
 end)
 
@@ -120,8 +148,7 @@ lib.callback.register('mri_Qjobsystem:server:getBalance', function(source, jobNa
     end
 end)
 
-RegisterNetEvent("mri_Qjobsystem:server:saveNewJob")
-AddEventHandler("mri_Qjobsystem:server:saveNewJob", function(jobData)
+RegisterNetEvent("mri_Qjobsystem:server:saveNewJob", function(jobData)
     local src = source
     if CanTrustPlayer(src) then
         if IsPlayerHasCustomPerms(src) then
@@ -150,8 +177,7 @@ AddEventHandler("mri_Qjobsystem:server:saveNewJob", function(jobData)
     end
 end)
 
-RegisterNetEvent("mri_Qjobsystem:server:saveJob")
-AddEventHandler("mri_Qjobsystem:server:saveJob", function(jobData)
+RegisterNetEvent("mri_Qjobsystem:server:saveJob", function(jobData)
     local src = source
     if CanTrustPlayer(src) then
         if IsPlayerHasCustomPerms(src) then
@@ -178,8 +204,7 @@ AddEventHandler("mri_Qjobsystem:server:saveJob", function(jobData)
     end
 end)
 
-RegisterNetEvent("mri_Qjobsystem:server:deleteJob")
-AddEventHandler("mri_Qjobsystem:server:deleteJob", function(jobData)
+RegisterNetEvent("mri_Qjobsystem:server:deleteJob", function(jobData)
     local src = source
     if CanTrustPlayer(src) then
         if IsPlayerHasCustomPerms(src) then
@@ -206,8 +231,7 @@ AddEventHandler("mri_Qjobsystem:server:deleteJob", function(jobData)
     end
 end)
 
-RegisterNetEvent("mri_Qjobsystem:server:pullChanges")
-AddEventHandler("mri_Qjobsystem:server:pullChanges", function(pullType)
+RegisterNetEvent("mri_Qjobsystem:server:pullChanges", function(pullType)
     local src = source
     if CanTrustPlayer(src) then
         if IsPlayerHasCustomPerms(src) then
@@ -229,22 +253,22 @@ AddEventHandler("mri_Qjobsystem:server:pullChanges", function(pullType)
     end
 end)
 
-RegisterNetEvent("mri_Qjobsystem:server:createItem")
-AddEventHandler("mri_Qjobsystem:server:createItem", function(craftingData)
+RegisterNetEvent("mri_Qjobsystem:server:createItem", function(craftingData, amount)
+    local amount = amount or 1
     local src = source
     if CanTrustPlayer(src) then
         if IsPlayerHasCustomPerms(src) then
             local hasAllItems = true
             for _, v in pairs(craftingData.ingedience) do
-                if v.itemCount > BRIDGE.GetItemCount(src, v.itemName) then
+                if v.itemCount * amount > BRIDGE.GetItemCount(src, v.itemName) then
                     hasAllItems = false
                 end
             end
             if hasAllItems then
                 for _, v in pairs(craftingData.ingedience) do
-                    BRIDGE.RemoveItem(src, v.itemName, v.itemCount)
+                    BRIDGE.RemoveItem(src, v.itemName, v.itemCount * amount)
                 end
-                BRIDGE.AddItem(src, craftingData.itemName, craftingData.itemCount)
+                BRIDGE.AddItem(src, craftingData.itemName, craftingData.itemCount * amount)
             else
                 lib.notify(src, {
                     title = "Negado",
@@ -256,8 +280,7 @@ AddEventHandler("mri_Qjobsystem:server:createItem", function(craftingData)
     end
 end)
 
-RegisterNetEvent("mri_Qjobsystem:server:makeRegisterAction")
-AddEventHandler("mri_Qjobsystem:server:makeRegisterAction", function(jobName, action, number)
+RegisterNetEvent("mri_Qjobsystem:server:makeRegisterAction", function(jobName, action, number)
     local src = source
     if CanTrustPlayer(src) then
         if IsJobExist(jobName) then
@@ -308,8 +331,7 @@ AddEventHandler("mri_Qjobsystem:server:makeRegisterAction", function(jobName, ac
     end
 end)
 
-RegisterNetEvent("mri_Qjobsystem:server:createBackup")
-AddEventHandler("mri_Qjobsystem:server:createBackup", function(pullType)
+RegisterNetEvent("mri_Qjobsystem:server:createBackup", function(pullType)
     local src = source
     if CanTrustPlayer(src) then
         SaveResourceFile(GetCurrentResourceName(), "./server/backup.json", json.encode(Jobs), -1)
@@ -321,8 +343,7 @@ AddEventHandler("mri_Qjobsystem:server:createBackup", function(pullType)
     end
 end)
 
-RegisterNetEvent("mri_Qjobsystem:server:setBackup")
-AddEventHandler("mri_Qjobsystem:server:setBackup", function(pullType)
+RegisterNetEvent("mri_Qjobsystem:server:setBackup", function(pullType)
     local src = source
     if CanTrustPlayer(src) then
         local loadFile = LoadResourceFile(GetCurrentResourceName(), "./server/backup.json")
@@ -348,75 +369,66 @@ lib.addCommand('open_jobs', {
 end)
 
 ----------------- updateJobGradePermission
-
-    lib.callback.register('mri_Qjobsystem:server:updateJobGradePermission', function(source, data, propName, key, maiorIndice)
-        print("vamos att?")
-        local jobEncontrado = nil
-            jobEncontrado = data
-        if not jobEncontrado then
-            lib.notify(source, {
-                description = 'Erro ao tentar alterar cargo, entre em contato com a Administração.',
-                type = 'error',
-                duration = 3000
-            })
-            return data
-        end
-
-        -- Verifica se o jogador está tentando alterar o chefe supremo "boss"
-        if propName == "isboss" and tostring(maiorIndice) == key then
-            lib.notify(source, {
-                description = 'Você não pode alterar o cargo do Líder.',
-                type = 'error',
-                duration = 3600
-            })
-            return data
-        end
-        -- Atualiza a permissão no job.grades
-        jobEncontrado[propName] = not (jobEncontrado[propName] or false)
-        data[propName] = jobEncontrado[propName]
-
-                for i, jobGradeItem in pairs(Jobs) do
-                    if jobGradeItem.label == data.label then
-                        jobGradeItem.grades[key][propName] = data[propName]
-                    break end
-                end
-
-        -- Salva as mudanças no sistema
-        DB.SaveJobs(Jobs)
-        LoadJobs(true)
-
+lib.callback.register('mri_Qjobsystem:server:updateJobGradePermission', function(source, data, propName, key, maiorIndice)
+    local jobEncontrado = nil
+        jobEncontrado = data
+    if not jobEncontrado then
         lib.notify(source, {
-            description = 'Cargo atualizado com sucesso!',
-            type = 'success',
+            description = 'Erro ao tentar alterar cargo, entre em contato com a Administração.',
+            type = 'error',
+            duration = 3000
+        })
+        return data
+    end
+
+    if propName == "isboss" and tostring(maiorIndice) == key then
+        lib.notify(source, {
+            description = 'Você não pode alterar o cargo do Líder.',
+            type = 'error',
             duration = 3600
         })
+        return data
+    end
+    jobEncontrado[propName] = not (jobEncontrado[propName] or false)
+    data[propName] = jobEncontrado[propName]
 
-        -- Verifica se é necessário atualizar o playerJob no Qbcore onde só tem isboss, logo isrecruiter não é necessário atualizar
-        if propName == "isrecruiter" then
+            for i, jobGradeItem in pairs(Jobs) do
+                if jobGradeItem.label == data.label then
+                    jobGradeItem.grades[key][propName] = data[propName]
+                break end
+            end
+
+    DB.SaveJobs(Jobs)
+    LoadJobs(true)
+
+    lib.notify(source, {
+        description = 'Cargo atualizado com sucesso!',
+        type = 'success',
+        duration = 3600
+    })
+
+    if propName == "isrecruiter" then
+        return data
+    end
+
+    local groupEntries = DB.FetchPlayersInGroup(data.groupName, data.groupType, tonumber(key))
+        if next(groupEntries) == nil then
             return data
         end
-        -- Otimiza a busca pelos jogadores no grupo
-
-        local groupEntries = DB.FetchPlayersInGroup(data.groupName, data.groupType, tonumber(key))
-            if next(groupEntries) == nil then
-                return data
-            end
-        -- Atualiza os jogadores de acordo com o grupo se tiver jogadores no grupo + Cargo selecionado.
-        local setPlayerFunction
-        if data.groupType == 'job' then
-            setPlayerFunction = function(playerID, groupName)
-                exports.qbx_core:SetPlayerPrimaryJob(playerID, groupName)
-            end
-        else
-            setPlayerFunction = function(playerID, groupName)
-                exports.qbx_core:SetPlayerPrimaryGang(playerID, groupName)
-            end
+    local setPlayerFunction
+    if data.groupType == 'job' then
+        setPlayerFunction = function(playerID, groupName)
+            exports.qbx_core:SetPlayerPrimaryJob(playerID, groupName)
         end
-        -- Chamando o Qbcore para atualizar o playerIsboss
-        for i = 1, #groupEntries do
-            local playerID = groupEntries[i].citizenid
-            setPlayerFunction(playerID, data.groupName)
-            Wait(80)
+    else
+        setPlayerFunction = function(playerID, groupName)
+            exports.qbx_core:SetPlayerPrimaryGang(playerID, groupName)
         end
-        return data
-    end)
+    end
+    for i = 1, #groupEntries do
+        local playerID = groupEntries[i].citizenid
+        setPlayerFunction(playerID, data.groupName)
+        Wait(80)
+    end
+    return data
+end)

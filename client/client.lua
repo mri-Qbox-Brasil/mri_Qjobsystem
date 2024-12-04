@@ -7,10 +7,10 @@ local function AddNewPed(pedData)
     table.insert(Peds, pedData)
 end
 
-local function generateCrafting(craftItems, label, icon)
+local function generateCrafting(craftItems, label, type)
     local options = {}
     local metadata = {}
-    if craftItems then
+    if craftItems and type then
         options = {}
         for _, k in pairs(craftItems) do
             metadata = {{
@@ -27,18 +27,29 @@ local function generateCrafting(craftItems, label, icon)
                     value = l.itemCount
                 })
             end
-            local count = 1
-            if k.count then
-                count = k.count
-            end
+
             table.insert(options, {
-                title = items[k.itemName].label .. " - " .. count .. " x",
+                title = items[k.itemName].label .. " - " .. (k and k.count or 1) .. " x",
                 icon = Config.DirectoryToInventoryImages .. k.itemName .. ".png",
                 image = Config.DirectoryToInventoryImages .. k.itemName .. ".png",
                 onSelect = function()
+                    -- Perguntar quantos ele quer fabricar
+                    local input = lib.inputDialog('Digite a quantidade', {
+                        {type = 'number', label = 'Quantidade', default = 1}
+                    })
+
+                    if not input then
+                        return lib.notify({
+                            title = "Ação cancelada.",
+                            type = "error"
+                        })
+                    end
+
+                    local amount = input and input[1] or 1
+
                     local hasAllItems = true
                     for _, v in pairs(k.ingedience) do
-                        if v.itemCount > BRIDGE.GetItemCount(v.itemName) then
+                        if v.itemCount * amount > BRIDGE.GetItemCount(v.itemName) then
                             hasAllItems = false
                         end
                     end
@@ -48,16 +59,26 @@ local function generateCrafting(craftItems, label, icon)
                             dict = Config.DEFAULT_ANIM_DIC
                         }
                         if k.animation then
-                            if k.animation.dict and k.animation.anim then
-                                animData = {
-                                    anim = Config.DEFAULT_ANIM,
-                                    dict = k.animation.dict
-                                }
-                            end
+                            animData = {
+                                anim = k.animation.anim,
+                                dict = k.animation.dict,
+                                scully = k.animation.scully
+                            }
                         end
-                        local label_progress = icon and "Fabricando" or "Comprando"
+                        local label_progress = type and "Fabricando" or "Comprando"
+
+                        local anim = {
+                            anim = animData.anim,
+                            dict = animData.dict
+                        }
+
+                        if animData and animData.scully then
+                            ExecuteCommand(string.format("e %s", animData.scully))
+                            anim = nil
+                        end
+
                         if lib.progressCircle({
-                            duration = 10000,
+                            duration = k.duration and k.duration * 1000 * amount or 5000 * amount,
                             label = label_progress .. ' ' .. items[k.itemName].label,
                             position = 'bottom',
                             useWhileDead = false,
@@ -66,12 +87,12 @@ local function generateCrafting(craftItems, label, icon)
                                 car = true,
                                 move = true
                             },
-                            anim = {
-                                dict = animData.dict,
-                                clip = animData.anim
-                            }
+                            anim = anim
                         }) then
-                            TriggerSecureEvent("mri_Qjobsystem:server:createItem", k)
+                            if animData.scully then
+                                ExecuteCommand("e c")
+                            end
+                            TriggerSecureEvent("mri_Qjobsystem:server:createItem", k, amount)
                         end
                     else
                         lib.notify({
@@ -108,7 +129,6 @@ local function openCashRegister(job)
                 name = 'withdraw',
                 icon = 'fa-solid fa-arrow-down',
                 title = "Retirar",
-                -- groups = job.job,
                 onSelect = function(data)
                     local input = lib.inputDialog('Crie um novo trabalho', {{
                         type = 'number',
@@ -125,7 +145,6 @@ local function openCashRegister(job)
                 name = 'deposit',
                 icon = 'fa-solid fa-arrow-up',
                 title = "Depósito",
-                -- groups = job.job,
                 onSelect = function(data)
                     local input = lib.inputDialog('Crie um novo trabalho', {{
                         type = 'number',
@@ -162,7 +181,14 @@ local function GenerateCraftings()
                             local icon = crafting.icon or 'fa-solid fa-screwdriver-wrench'
                             local type = (icon == 'fa-solid fa-screwdriver-wrench') and true or false
 
-                            generateCrafting(crafting.items, craftinglabel, type)
+                            if type then
+                                generateCrafting(crafting.items, craftinglabel, type)
+                            else
+                                print(crafting.id)
+                                exports.ox_inventory:openInventory('shop', {
+                                    type = crafting.id
+                                })
+                            end
                         else
                             lib.notify({
                                 title = "Você não tem permissão",
@@ -296,50 +322,6 @@ local function GenerateCraftings()
             })
             table.insert(Targets, BossTarget)
         end
-
-        if job.stashes then
-            for _, stash in pairs(job.stashes) do
-                local stashID = BRIDGE.AddSphereTarget({
-                    coords = vector3(stash.coords.x, stash.coords.y, stash.coords.z),
-                    options = {{
-                        name = stash.id,
-                        icon = 'fa-solid fa-boxes-stacked',
-                        label = stash.label,
-                        onSelect = function(data)
-                            if stash.job then
-                                local jobname = BRIDGE.GetPlayerJob()
-                                local gangname = BRIDGE.GetPlayerGang()
-                                if jobname == job.job or gangname == job.job then
-                                    BRIDGE.OpenStash(stash.id, stash.weight, stash.slots)
-                                else
-                                    lib.notify({
-                                        title = "Você não tem permissão",
-                                        description = "Você não pode usar isso.",
-                                        type = "error"
-                                    })
-                                end
-                            else
-                                BRIDGE.OpenStash(stash.id)
-                            end
-                        end
-                    }},
-                    debug = false,
-                    radius = 0.2
-                })
-                table.insert(Targets, stashID)
-            end
-        end
-        if job.peds then
-            for _, ped in pairs(Peds) do
-                if ped.entity then
-                    DeleteEntity(ped.entity)
-                end
-            end
-            Peds = {}
-            for _, ped in pairs(job.peds) do
-                AddNewPed(ped)
-            end
-        end
     end
 end
 
@@ -361,42 +343,4 @@ AddEventHandler("mri_Qjobsystem:client:Pull", function(ServerJobs)
     Jobs = ServerJobs
     Wait(100)
     GenerateCraftings()
-end)
-
-CreateThread(function()
-    while true do
-        local playerCoords = GetEntityCoords(cache.ped)
-        for i, ped in pairs(Peds) do
-            if not Peds[i].entity then
-                if #(vector3(playerCoords.x, playerCoords.y, playerCoords.z) -
-                    vector3(ped.coords.x, ped.coords.y, ped.coords.z)) < 60.0 then
-                    local model = ped.model
-                    RequestModel(model)
-                    while not HasModelLoaded(model) do
-                        Wait(50)
-                    end
-                    Peds[i].entity = CreatePed(4, model, ped.coords.x, ped.coords.y, ped.coords.z - 1, ped.heading,
-                        false, true)
-                    FreezeEntityPosition(Peds[i].entity, true)
-                    SetEntityInvincible(Peds[i].entity, true)
-                    SetBlockingOfNonTemporaryEvents(Peds[i].entity, true)
-                    if ped.animDict and ped.animAnim then
-                        RequestAnimDict(ped.animDict)
-                        while not HasAnimDictLoaded(ped.animDict) do
-                            Wait(50)
-                        end
-
-                        TaskPlayAnim(Peds[i].entity, ped.animDict, ped.animAnim, 8.0, 0, -1, 1, 0, 0, 0)
-                    end
-                end
-            else
-                if #(vector3(playerCoords.x, playerCoords.y, playerCoords.z) -
-                    vector3(ped.coords.x, ped.coords.y, ped.coords.z)) > 60.0 then
-                    DeleteEntity(Peds[i].entity)
-                    Peds[i].entity = nil
-                end
-            end
-        end
-        Wait(8000)
-    end
 end)
