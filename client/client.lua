@@ -184,7 +184,6 @@ local function GenerateCraftings()
                             if type then
                                 generateCrafting(crafting.items, craftinglabel, type)
                             else
-                                print(crafting.id)
                                 exports.ox_inventory:openInventory('shop', {
                                     type = crafting.id
                                 })
@@ -325,8 +324,38 @@ local function GenerateCraftings()
     end
 end
 
+RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
+    local PlayerData = QBX.PlayerData
+    local jobName = PlayerData.job.name
+    local jobType = PlayerData.job.type
+    local jobGrade = PlayerData.job.grade
+
+    LocalPlayer.state:set('jobName', jobName, true)
+    LocalPlayer.state:set('jobType', jobType, true)
+    LocalPlayer.state:set('jobGrade', jobGrade, true)
+end)
+
+RegisterNetEvent('QBCore:Client:OnJobUpdate', function()
+    local PlayerData = QBX.PlayerData
+    local jobName = PlayerData.job.name
+    local jobType = PlayerData.job.type
+    local jobGrade = PlayerData.job.grade
+
+    LocalPlayer.state:set('jobName', jobName, true)
+    LocalPlayer.state:set('jobType', jobType, true)
+    LocalPlayer.state:set('jobGrade', jobGrade, true)
+end)
+
 RegisterNetEvent("mri_Qjobsystem:client:receiveJobs", function(ServerJobs)
+    local PlayerData = QBX.PlayerData
+    local jobType = PlayerData.job.type
+
+    LocalPlayer.state:set('jobType', jobType, true)
     if ServerJobs then
+        for _, tid in pairs(Targets) do
+            BRIDGE.RemoveSphereTarget(tid)
+        end
+        Wait(100)
         Jobs = ServerJobs
         GenerateCraftings()
     end

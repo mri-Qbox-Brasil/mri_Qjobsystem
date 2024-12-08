@@ -392,7 +392,6 @@ end
 
 function OpenJobsGrades(jobData)
     selectedJob = jobData
-    print(json.encode(jobData))
     local options = {}
     if jobData.type == 'job' then
         options[#options + 1] = {
@@ -510,8 +509,6 @@ function OpenJobsGrades(jobData)
 
             selectedJob.grades = newGrades
             TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
-
-            print(json.encode(selectedJob))
 
             lib.notify({
                 title = 'Cargo excluído',
@@ -767,6 +764,39 @@ local function openCraftingTable(id)
             end
         }
 
+        -- Alterar localização
+        options[#options + 1] = {
+            title = "Alterar localização",
+            description = "Clique aqui para alterar a localização.",
+            icon = 'location',
+            onSelect = function()
+                -- Perguntar com um aviso se a pessoa quer realmente alterar a localização
+                local alert = lib.alertDialog({
+                    header = "Alterar localização",
+                    content = "Voce realmente quer alterar a localização?",
+                    centered = true,
+                    cancel = true
+                })
+                if alert ~= "confirm" then
+                    return lib.notify({
+                        title = "Negado",
+                        description = "Operação cancelada.",
+                        type = "error"
+                    })
+                end
+                
+                -- Usar raycast para pegar coordenadas
+                local coords = getRayCoords()
+                if coords then
+                    selectedCrafting.coords = coords
+                    TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
+                    Wait(500)
+                end
+
+                openCraftingTable(cached.crafting_table_id)
+            end
+        }
+
         options[#options + 1] = {
             title = "Excluir",
             description = "Clique aqui para excluir.",
@@ -850,7 +880,6 @@ function EditCraftingItem()
             description = "Isso é o que o jogador recebe",
             icon = 'hashtag',
             onSelect = function()
-                print(selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].itemCount)
                 local input = lib.inputDialog('Alterar quantidade', {'Digite a quantidade:'})
                 if input then
                     selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].itemCount = tonumber(
@@ -1156,7 +1185,6 @@ RegisterNetEvent("mri_Qjobsystem:client:createjob", function()
     newJob.type = input[3]
 
     local Jobs = exports.qbx_core:GetJobs()
-    print(json.encode(Jobs))
     for k, v in pairs(Jobs) do
         if k == newJob.job then
             lib.notify({

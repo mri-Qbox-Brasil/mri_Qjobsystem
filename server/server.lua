@@ -50,22 +50,18 @@ local function LoadJobs(isStarting)
             Citizen.CreateThread(function()
                 for k, v in pairs(job.craftings) do
                     local shopItems = {}
-            
+        
                     for _, item in ipairs(v.items) do
-                        print(json.encode(item))
                         table.insert(shopItems, {
                             name = item.itemName,
-                            price = item.ingedience[1].itemCount, 
+                            price = item.ingedience[1].itemCount or 0, 
                             currency = item.ingedience[1].itemName,
                             count = item.stockAmount,
                             license = item.license,
                             metadata = item.metadata,
                             grade = item.grade
                         })
-                    end
-
-                    -- print(json.encode(shopItems))
-            
+                    end            
                     exports.ox_inventory:RegisterShop(v.id, {
                         name = v.label,
                         inventory = shopItems,
