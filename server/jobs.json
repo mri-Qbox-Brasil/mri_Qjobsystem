@@ -1,178 +1,165 @@
 [
   {
-    "craftings": [
-      {
-        "coords": {
-          "z": 30.3753662109375,
-          "x": 449.4537048339844,
-          "y": -978.1087646484376
-        },
-        "id": "police0_5055",
-        "items": [
-          {
-            "itemCount": 10,
-            "itemName": "handcuffs",
-            "ingedience": [
-              { "itemCount": 3, "itemName": "plastic" },
-              { "itemCount": 2, "itemName": "garbage" }
-            ]
-          }
-        ],
-        "label": "Algemas"
-      }
-    ],
-    "type": "job",
-    "label": "Polícia",
-    "balance": 2001,
-    "grades": {
-      "2": { "payment": 500, "name": "Tenente" },
-      "3": {
-        "name": "Chefe",
-        "isboss": true,
-        "payment": 555,
-        "bankAuth": true
-      },
-      "0": { "payment": 500, "name": "Recruta" },
-      "1": { "payment": 200, "name": "Soldado" }
-    },
-    "jobtype": "leo",
-    "alarm": {
-      "z": 29.49523544311523,
-      "x": 148.6542510986328,
-      "y": -1036.444091796875
-    },
-    "duty": {
-      "z": 30.10904884338379,
-      "x": 452.6276550292969,
-      "y": -976.2214965820313
-    },
-    "bossmenu": {
-      "z": 30.43862152099609,
-      "x": 447.3981018066406,
-      "y": -974.0276489257813
-    },
     "stashes": [
       {
-        "slots": 50,
-        "coords": {
-          "z": 30.63170433044433,
-          "x": 452.0380554199219,
-          "y": -972.8811645507813
-        },
         "job": true,
-        "id": "police0_9123",
         "label": "Baú da Polícia",
-        "weight": 500000
+        "weight": 500000,
+        "slots": 50,
+        "id": "police0_9123",
+        "coords": {
+          "y": -972.8811645507813,
+          "z": 30.63170433044433,
+          "x": 452.0380554199219
+        }
       }
     ],
+    "jobtype": "leo",
+    "grades": {
+      "1": { "payment": 200, "name": "Soldado" },
+      "2": { "payment": 500, "name": "Tenente" },
+      "3": {
+        "payment": 555,
+        "isboss": true,
+        "name": "Chefe",
+        "bankAuth": true
+      },
+      "0": { "payment": 500, "name": "Recruta" }
+    },
+    "craftings": [],
     "job": "police",
+    "type": "job",
+    "balance": 2001,
+    "label": "Polícia",
     "coords": {
+      "y": -979.2796020507813,
       "z": 30.68960189819336,
-      "x": 447.1144104003906,
-      "y": -979.2796020507813
+      "x": 447.1144104003906
+    },
+    "alarm": {
+      "y": -1036.444091796875,
+      "z": 29.49523544311523,
+      "x": 148.6542510986328
+    },
+    "duty": {
+      "y": -976.2214965820313,
+      "z": 30.10904884338379,
+      "x": 452.6276550292969
+    },
+    "bossmenu": {
+      "y": -974.0276489257813,
+      "z": 30.43862152099609,
+      "x": 447.3981018066406
     }
   },
   {
-    "label": "Hospital",
-    "craftings": [],
-    "type": "job",
-    "coords": {
-      "z": 29.46170234680175,
-      "x": 413.5118713378906,
-      "y": -967.9647827148438
-    },
-    "job": "ambulance",
-    "grades": {
-      "2": {
-        "name": "Diretor",
-        "isboss": true,
-        "payment": 300,
-        "bankAuth": true
-      },
-      "0": { "payment": 100, "name": "Paramédico" },
-      "1": { "payment": 200, "name": "Médico" }
-    },
+    "stashes": [],
     "jobtype": "ems",
+    "grades": {
+      "1": { "payment": 200, "name": "Médico" },
+      "2": {
+        "bankAuth": true,
+        "isboss": true,
+        "name": "Diretor",
+        "payment": 300
+      },
+      "0": { "payment": 100, "name": "Paramédico" }
+    },
+    "craftings": [],
+    "job": "ambulance",
+    "type": "job",
+    "label": "Hospital",
+    "coords": {
+      "y": -967.9647827148438,
+      "z": 29.46170234680175,
+      "x": 413.5118713378906
+    },
     "typejob": ""
   },
   {
+    "stashes": [],
+    "jobtype": "mechanic",
     "grades": {
+      "1": { "payment": 200, "name": "Mecânico" },
       "2": {
+        "bankAuth": true,
+        "isboss": true,
         "name": "Gerente",
-        "isboss": true,
-        "payment": 300,
-        "bankAuth": true
+        "payment": 300
       },
-      "0": { "payment": 100, "name": "Aprendiz de Mecãnico" },
-      "1": { "payment": 200, "name": "Mecânico" }
+      "0": { "payment": 100, "name": "Aprendiz de Mecãnico" }
     },
     "craftings": [],
-    "type": "job",
-    "coords": {
-      "z": 29.46170234680175,
-      "x": 413.5118713378906,
-      "y": -967.9647827148438
-    },
     "job": "mechanic",
-    "typejob": "",
-    "jobtype": "mechanic",
-    "label": "Los Customs"
-  },
-  {
-    "label": "Ballas",
-    "craftings": [],
-    "type": "gang",
-    "coords": {
-      "z": 29.46170234680175,
-      "x": 413.5118713378906,
-      "y": -967.9647827148438
-    },
-    "job": "ballas",
-    "typejob": "",
-    "jobtype": "mechanic",
-    "grades": {
-      "2": { "name": "Líder", "isboss": true, "bankAuth": true },
-      "0": { "name": "Recruta" },
-      "1": { "name": "Membro" }
-    }
-  },
-  {
-    "typejob": "",
-    "craftings": [],
-    "type": "gang",
-    "coords": {
-      "z": 29.46170234680175,
-      "x": 413.5118713378906,
-      "y": -967.9647827148438
-    },
-    "job": "vaggos",
-    "grades": {
-      "2": { "name": "Líder", "isboss": true, "bankAuth": true },
-      "0": { "name": "Recruta" },
-      "1": { "name": "Membro" }
-    },
-    "jobtype": "mechanic",
-    "label": "Vaggos"
-  },
-  {
-    "label": "Imobiliária",
-    "craftings": [],
     "type": "job",
+    "label": "Los Customs",
     "coords": {
+      "y": -967.9647827148438,
       "z": 29.46170234680175,
-      "x": 413.5118713378906,
-      "y": -967.9647827148438
+      "x": 413.5118713378906
     },
-    "job": "realestate",
+    "typejob": ""
+  },
+  {
+    "stashes": [],
+    "jobtype": "mechanic",
     "grades": {
+      "1": { "name": "Membro" },
+      "2": { "bankAuth": true, "isboss": true, "name": "Líder" },
+      "0": { "name": "Recruta" }
+    },
+    "craftings": [],
+    "job": "ballas",
+    "type": "gang",
+    "label": "Ballas",
+    "coords": {
+      "y": -967.9647827148438,
+      "z": 29.46170234680175,
+      "x": 413.5118713378906
+    },
+    "typejob": ""
+  },
+  {
+    "stashes": [],
+    "jobtype": "mechanic",
+    "grades": {
+      "1": { "name": "Membro" },
+      "2": { "bankAuth": true, "isboss": true, "name": "Líder" },
+      "0": { "name": "Recruta" }
+    },
+    "craftings": [],
+    "job": "vaggos",
+    "type": "gang",
+    "label": "Vaggos",
+    "coords": {
+      "y": -967.9647827148438,
+      "z": 29.46170234680175,
+      "x": 413.5118713378906
+    },
+    "typejob": ""
+  },
+  {
+    "stashes": [],
+    "jobtype": "realestate",
+    "grades": {
+      "1": { "payment": 200, "name": "Gerente" },
+      "2": { "payment": 300, "isboss": true, "name": "Dono", "bankAuth": true },
       "0": {
-        "name": "Corretor de Imóveis",
-        "isboss": true,
         "payment": 100,
+        "isboss": true,
+        "name": "Corretor de Imóveis",
         "bankAuth": true
       }
     },
-    "jobtype": "realestate",
-    "typejob": ""
+    "craftings": [],
+    "job": "realestate",
+    "type": "job",
+    "label": "Imobiliária",
+    "typejob": "",
+    "coords": {
+      "y": -967.9647827148438,
+      "z": 29.46170234680175,
+      "x": 413.5118713378906
+    }
   }
 ]
