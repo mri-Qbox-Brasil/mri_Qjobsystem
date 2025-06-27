@@ -22,6 +22,11 @@ local function decodeGrades(grades)
     return result
 end
 
+lib.callback.register("mri_Qjobsystem:server:openCrafting", function(source, id)
+    print("Forçou abertura do " .. id)
+    exports.ox_inventory:forceOpenInventory(source, 'crafting', id)
+end)
+
 local function LoadJobs(isStarting)
     if isStarting then
         DB.CreateTable()
@@ -29,6 +34,7 @@ local function LoadJobs(isStarting)
 
     local data = DB.FetchJobs()
     if #data <= 0 then
+        print("AVISO SEM TABELAS: RECRIANDO")
         local loadFile = LoadResourceFile(GetCurrentResourceName(), "./server/jobs.json")
         Jobs = json.decode(loadFile) or {}
 
@@ -46,30 +52,64 @@ local function LoadJobs(isStarting)
             else
                 job.stashes = {}
             end
-            
-            Citizen.CreateThread(function()
-                for k, v in pairs(job.craftings) do
-                    local shopItems = {}
-        
-                    for _, item in ipairs(v.items) do
-                        table.insert(shopItems, {
-                            name = item.itemName,
-                            price = item.ingedience[1].itemCount or 0, 
-                            currency = item.ingedience[1].itemName,
-                            count = item.stockAmount,
-                            license = item.license,
-                            metadata = item.metadata,
-                            grade = item.grade
-                        })
-                    end            
-                    exports.ox_inventory:RegisterShop(v.id, {
-                        name = v.label,
-                        inventory = shopItems,
-                    })
-            
+
+            CreateThread(function()
+                for _, craftingTable in pairs(job.craftings or {}) do
+                    local icon = craftingTable.icon or 'fa-solid fa-screwdriver-wrench'
+                    local isShop = icon ~= 'fa-solid fa-screwdriver-wrench'
+                    local items = {}
+
+                    for _, item in ipairs(craftingTable.items or {}) do
+                        if isShop then
+                            -- SHOP
+                            local ing = item.ingedience and item.ingedience[1]
+                            if item.itemName and ing then
+                                table.insert(items, {
+                                    name = item.itemName,
+                                    price = ing.itemCount or 0,
+                                    currency = ing.itemName,
+                                    count = tonumber(item.stockAmount) or nil,
+                                    license = item.license,
+                                    metadata = item.metadata,
+                                    grade = item.grade
+                                })
+                            end
+                        else
+                            -- CRAFTING
+                            local ingredients = {}
+                            if item.ingedience then
+                                for _, ing in pairs(item.ingedience) do
+                                    ingredients[ing.itemName] = ing.itemCount
+                                end
+                            end
+
+                            table.insert(items, {
+                                name = item.itemName,
+                                ingredients = ingredients,
+                                duration = (item.duration or 5) * 1000,
+                                count = item.itemCount or 1,
+                                metadata = item.metadata
+                            })
+                        end
+                    end
+
+                    if #items > 0 then
+                        if isShop then
+                            exports.ox_inventory:RegisterShop(craftingTable.id, {
+                                name = craftingTable.label or craftingTable.id,
+                                inventory = items
+                            })
+                        else
+                            print("Registrando Crafting: ID/NAME " .. craftingTable.id .. " - " .. craftingTable.label .. " INDEX " .._)
+                            exports.ox_inventory:createCraftingBench(craftingTable.id, {
+                                name = craftingTable.id,
+                                label = craftingTable.label,
+                                items = items,
+                            })
+                        end
+                    end
                 end
             end)
-                       
         end
         if job.type == "job" then
             dataJobs[job.job] = {

@@ -183,6 +183,9 @@ local function GenerateCraftings()
 
                             if type then
                                 generateCrafting(crafting.items, craftinglabel, type)
+                                -- print("Abrindo crafting com ID:", crafting.id)
+                                -- exports.ox_inventory:openInventory('crafting', { id = crafting.id })
+                                -- lib.callback.await('mri_Qjobsystem:server:openCrafting', false, crafting.id)
                             else
                                 exports.ox_inventory:openInventory('shop', {
                                     type = crafting.id
@@ -301,7 +304,7 @@ local function GenerateCraftings()
                 options = {{
                     name = 'bell',
                     icon = 'fa-solid fa-laptop',
-                    label = "Boss menu",
+                    label = "Boss menu "..job.job,
                     onSelect = function(data)
                         local jobname = BRIDGE.GetPlayerJob()
                         local gangname = BRIDGE.GetPlayerGang()

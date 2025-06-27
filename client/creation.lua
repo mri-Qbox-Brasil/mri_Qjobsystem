@@ -784,7 +784,7 @@ local function openCraftingTable(id)
                         type = "error"
                     })
                 end
-                
+
                 -- Usar raycast para pegar coordenadas
                 local coords = getRayCoords()
                 if coords then
@@ -1026,9 +1026,10 @@ function EditCraftingItem()
             })
 
             -- definir metadata (tipo tabela, pode receber registered [true, false] e serial [ex: POL])
-            local metadata = selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].metadata
-            local serial = metadata and metadata.serial
-            local description = metadata and ("Registrado: %s | Serial: %s"):format(metadata.registered, metadata.serial)
+            local metadata = selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].metadata or {}
+            local serial = metadata.serial or ""
+            local description = ("Registrado: %s | Serial: %s"):format(metadata.registered and "Sim" or "Não", serial)
+
             table.insert(options, {
                 title = "Metadados",
                 description = description,
@@ -1036,28 +1037,41 @@ function EditCraftingItem()
                 onSelect = function()
                     local input = lib.inputDialog('Metadados', {
                         { type = "select", label = "Registrar", options = {
-                            { value = true, label = "Sim"},
-                            { value = false, label = "Não"}
-                        }, 
-                        default = metadata and metadata.registered,
-                        required = true },
-                        { type = "input", label = "Serial", description = "Digite o serial do item (ex: POL)", default = metadata and metadata.serial }
+                            { value = true, label = "Sim" },
+                            { value = false, label = "Não" }
+                        }, default = metadata.registered or false },
+
+                        { type = "input", label = "Serial", description = "Serial do item", default = serial },
+
+                        { type = "input", label = "Label", description = "Nome do item", default = metadata.label or "" },
+
+                        { type = "number", label = "Peso", description = "Peso do item", default = metadata.weight or nil },
+
+                        { type = "input", label = "Descrição", description = "Descrição do tooltip", default = metadata.description or "" },
+
+                        { type = "input", label = "URL da imagem", description = "URL completa da imagem", default = metadata.imageurl or "" },
+
+                        { type = "input", label = "Tipo", description = "Tipo do item mostrado no canto superior", default = metadata.type or "" }
                     })
+
                     if input then
-                        local new_metadata = {}
-                        if input[1] then
-                            new_metadata = {
-                                registered = true,
-                                serial = input[2]
-                            }
-                        end
-                        selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].metadata = new_metadata
+                        selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].metadata = {
+                            registered = input[1],
+                            serial = input[2],
+                            label = input[3] ~= "" and input[3] or nil,
+                            weight = input[4] ~= "" and tonumber(input[4]) or nil,
+                            description = input[5] ~= "" and input[5] or nil,
+                            image = input[6] ~= "" and input[6] or nil,
+                            imageurl = input[7] ~= "" and input[7] or nil,
+                        }
                         TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
                     end
+
                     Wait(500)
                     EditCraftingItem()
                 end
             })
+
 
             -- definir grade (o número do rank permitido para comprar o item)
             local grade = selectedJob.craftings[cached.crafting_table_id].items[cached.crafting_item_id].grade
@@ -1313,7 +1327,7 @@ end)
 ----------------------- Permission menu
 -----------------------------------------------------
 local function setGradeManagement(propName, callback, key, maiorIndice, jobGrade)
-    local result = lib.callback.await('mri_Qjobsystem:server:updateJobGradePermission', false, jobGrade, propName, key, maiorIndice)       
+    local result = lib.callback.await('mri_Qjobsystem:server:updateJobGradePermission', false, jobGrade, propName, key, maiorIndice)
         currentPlayerJob.grades[key][propName] = result[propName]
     return callback(key, jobGrade.groupType, result)
 end
@@ -1338,10 +1352,10 @@ local function menuObj(title, modifier, callback, propName, key, maiorIndice, jo
     }
 end
 
-local function gfxMenu(key, groupType, jobGrade)   
+local function gfxMenu(key, groupType, jobGrade)
     -- Calcula o maior índice para pegar o ultimo cargo - boss
     local maiorIndice = -1
-    
+
     for gradeIndex in pairs(currentPlayerJob.grades) do
         local numIndex = tonumber(gradeIndex)
         if numIndex and numIndex > maiorIndice then
@@ -1360,7 +1374,7 @@ local function gfxMenu(key, groupType, jobGrade)
                        menuObj("Recrutador", jobGrade["isrecruiter"], gfxMenu, 'isrecruiter', key, maiorIndice, jobGrade)}
     else
         -- Se o jogador não for o chefe, mostra apenas a opção de Recrutador
-        
+
         menuOptions = {menuObj("Recrutador", jobGrade["isrecruiter"], gfxMenu, 'isrecruiter', key, maiorIndice, jobGrade)}
     end
     local ctx = {
@@ -1395,14 +1409,14 @@ local function jobGradeMenu(groupType)
             jobGrade.groupName = groupName
             jobGradeMenuItems[#jobGradeMenuItems + 1] = {
                 title = '[' .. i .. '] ' .. jobGrade["name"],
-                onSelect = function()                  
+                onSelect = function()
                     gfxMenu(i, groupType, jobGrade)
                 end
             }
     end
 
     jobGradeMenuItems = exports.mri_Qjobsystem:SortByTitleIndex(jobGradeMenuItems)
-    
+
     local ctx = {
         id = 'jobGradeMenu',
         menu = 'openBossMenu',
