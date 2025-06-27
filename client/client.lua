@@ -309,7 +309,11 @@ local function GenerateCraftings()
                         local jobname = BRIDGE.GetPlayerJob()
                         local gangname = BRIDGE.GetPlayerGang()
                         if jobname == job.job or gangname == job.job then
-                            openBossmenu(job.type)
+                            if exports['dw-bossmenu'] then
+                                exports['dw-bossmenu']:OpenJobManager(job.job)
+                            else
+                                openBossmenu(job.type)
+                            end
                         else
                             lib.notify({
                                 title = "Você não tem permissão",
