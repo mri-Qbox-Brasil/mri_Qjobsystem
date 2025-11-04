@@ -224,6 +224,16 @@ local function selectJob(jobData)
                 end
             end
         }, {
+            title = "Ponto batido por padrão",
+            description = "Status: " .. (selectedJob.defaultDuty and "Ativado" or "Desativado"),
+            icon = 'clock',
+            onSelect = function()
+                selectedJob.defaultDuty = not selectedJob.defaultDuty
+                TriggerSecureEvent("mri_Qjobsystem:server:saveJob", selectedJob)
+                Wait(500)
+                selectJob(jobData)
+            end
+        }, {
             title = "Caixa registradora",
             description = "Status: " .. addonsExists(selectedJob.register),
             icon = 'dollar',
@@ -784,7 +794,7 @@ local function openCraftingTable(id)
                         type = "error"
                     })
                 end
-                
+
                 -- Usar raycast para pegar coordenadas
                 local coords = getRayCoords()
                 if coords then
@@ -1038,7 +1048,7 @@ function EditCraftingItem()
                         { type = "select", label = "Registrar", options = {
                             { value = true, label = "Sim"},
                             { value = false, label = "Não"}
-                        }, 
+                        },
                         default = metadata and metadata.registered,
                         required = true },
                         { type = "input", label = "Serial", description = "Digite o serial do item (ex: POL)", default = metadata and metadata.serial }
@@ -1313,7 +1323,7 @@ end)
 ----------------------- Permission menu
 -----------------------------------------------------
 local function setGradeManagement(propName, callback, key, maiorIndice, jobGrade)
-    local result = lib.callback.await('mri_Qjobsystem:server:updateJobGradePermission', false, jobGrade, propName, key, maiorIndice)       
+    local result = lib.callback.await('mri_Qjobsystem:server:updateJobGradePermission', false, jobGrade, propName, key, maiorIndice)
         currentPlayerJob.grades[key][propName] = result[propName]
     return callback(key, jobGrade.groupType, result)
 end
@@ -1338,10 +1348,10 @@ local function menuObj(title, modifier, callback, propName, key, maiorIndice, jo
     }
 end
 
-local function gfxMenu(key, groupType, jobGrade)   
+local function gfxMenu(key, groupType, jobGrade)
     -- Calcula o maior índice para pegar o ultimo cargo - boss
     local maiorIndice = -1
-    
+
     for gradeIndex in pairs(currentPlayerJob.grades) do
         local numIndex = tonumber(gradeIndex)
         if numIndex and numIndex > maiorIndice then
@@ -1360,7 +1370,7 @@ local function gfxMenu(key, groupType, jobGrade)
                        menuObj("Recrutador", jobGrade["isrecruiter"], gfxMenu, 'isrecruiter', key, maiorIndice, jobGrade)}
     else
         -- Se o jogador não for o chefe, mostra apenas a opção de Recrutador
-        
+
         menuOptions = {menuObj("Recrutador", jobGrade["isrecruiter"], gfxMenu, 'isrecruiter', key, maiorIndice, jobGrade)}
     end
     local ctx = {
@@ -1395,14 +1405,14 @@ local function jobGradeMenu(groupType)
             jobGrade.groupName = groupName
             jobGradeMenuItems[#jobGradeMenuItems + 1] = {
                 title = '[' .. i .. '] ' .. jobGrade["name"],
-                onSelect = function()                  
+                onSelect = function()
                     gfxMenu(i, groupType, jobGrade)
                 end
             }
     end
 
     jobGradeMenuItems = exports.mri_Qjobsystem:SortByTitleIndex(jobGradeMenuItems)
-    
+
     local ctx = {
         id = 'jobGradeMenu',
         menu = 'openBossMenu',

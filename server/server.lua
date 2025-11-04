@@ -46,36 +46,36 @@ local function LoadJobs(isStarting)
             else
                 job.stashes = {}
             end
-            
+
             Citizen.CreateThread(function()
                 for k, v in pairs(job.craftings) do
                     local shopItems = {}
-        
+
                     for _, item in ipairs(v.items) do
                         table.insert(shopItems, {
                             name = item.itemName,
-                            price = item.ingedience[1].itemCount or 0, 
+                            price = item.ingedience[1].itemCount or 0,
                             currency = item.ingedience[1].itemName,
                             count = item.stockAmount,
                             license = item.license,
                             metadata = item.metadata,
                             grade = item.grade
                         })
-                    end            
+                    end
                     exports.ox_inventory:RegisterShop(v.id, {
                         name = v.label,
                         inventory = shopItems,
                     })
-            
+
                 end
             end)
-                       
+
         end
         if job.type == "job" then
             dataJobs[job.job] = {
                 label = job.label,
                 type = job.jobtype,
-                defaultDuty = true,
+                defaultDuty = job.defaultDuty,
                 offDutyPay = false,
                 grades = decodeGrades(job.grades)
             }

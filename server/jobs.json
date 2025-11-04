@@ -29,6 +29,7 @@
     "craftings": [],
     "job": "police",
     "type": "job",
+    "defaultDuty": true,
     "balance": 2001,
     "label": "Polícia",
     "coords": {
@@ -68,6 +69,7 @@
     "craftings": [],
     "job": "ambulance",
     "type": "job",
+    "defaultDuty": true,
     "label": "Hospital",
     "coords": {
       "y": -967.9647827148438,
@@ -92,6 +94,7 @@
     "craftings": [],
     "job": "mechanic",
     "type": "job",
+    "defaultDuty": true,
     "label": "Los Customs",
     "coords": {
       "y": -967.9647827148438,
