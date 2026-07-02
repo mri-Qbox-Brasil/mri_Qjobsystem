@@ -22,6 +22,48 @@ local function decodeGrades(grades)
     return result
 end
 
+local function RegisterJobAssets(job)
+    if not job then
+        return
+    end
+
+    if job.stashes then
+        for _, stash in pairs(job.stashes) do
+            BRIDGE.RegisterStash(stash.id, stash.label, stash.slots, stash.weight)
+        end
+    else
+        job.stashes = {}
+    end
+
+    Citizen.CreateThread(function()
+        for _, crafting in pairs(job.craftings or {}) do
+            local shopItems = {}
+
+            for _, item in ipairs(crafting.items or {}) do
+                local firstIngredient = item.ingedience and item.ingedience[1] or {}
+                table.insert(shopItems, {
+                    name = item.itemName,
+                    price = firstIngredient.itemCount or 0,
+                    currency = firstIngredient.itemName,
+                    count = item.stockAmount,
+                    license = item.license,
+                    metadata = item.metadata,
+                    grade = item.grade
+                })
+            end
+
+            exports.ox_inventory:RegisterShop(crafting.id, {
+                name = crafting.label,
+                inventory = shopItems,
+            })
+        end
+    end)
+end
+
+local function BroadcastJobs(target)
+    TriggerClientEvent("mri_Qjobsystem:client:receiveJobs", target or -1, Jobs)
+end
+
 local function LoadJobs(isStarting)
     if isStarting then
         DB.CreateTable()
@@ -39,37 +81,7 @@ local function LoadJobs(isStarting)
 
     for _, job in pairs(Jobs) do
         if isStarting then
-            if job.stashes then
-                for _, stash in pairs(job.stashes) do
-                    BRIDGE.RegisterStash(stash.id, stash.label, stash.slots, stash.weight)
-                end
-            else
-                job.stashes = {}
-            end
-
-            Citizen.CreateThread(function()
-                for k, v in pairs(job.craftings) do
-                    local shopItems = {}
-
-                    for _, item in ipairs(v.items) do
-                        table.insert(shopItems, {
-                            name = item.itemName,
-                            price = item.ingedience[1].itemCount or 0,
-                            currency = item.ingedience[1].itemName,
-                            count = item.stockAmount,
-                            license = item.license,
-                            metadata = item.metadata,
-                            grade = item.grade
-                        })
-                    end
-                    exports.ox_inventory:RegisterShop(v.id, {
-                        name = v.label,
-                        inventory = shopItems,
-                    })
-
-                end
-            end)
-
+            RegisterJobAssets(job)
         end
         if job.type == "job" then
             dataJobs[job.job] = {
@@ -94,7 +106,7 @@ local function LoadJobs(isStarting)
     end
     if isStarting then
         Wait(2000)
-        TriggerClientEvent("mri_Qjobsystem:client:receiveJobs", -1, Jobs)
+        BroadcastJobs(-1)
     end
 end
 
@@ -111,12 +123,18 @@ end)
 AddEventHandler(GetCurrentResourceName() .. ':playerLoaded', function(playerId)
     LoadJobs(true)
     Wait(2000)
-    TriggerClientEvent("mri_Qjobsystem:client:receiveJobs", playerId, Jobs)
+    BroadcastJobs(playerId)
 end)
 
 local function SaveJobs()
     DB.SaveJobs(Jobs)
     LoadJobs()
+end
+
+local function ReloadJobsRuntime(target)
+    LoadJobs(true)
+    Wait(500)
+    BroadcastJobs(target or -1)
 end
 
 local function IsJobExist(jobName)
@@ -247,6 +265,18 @@ RegisterNetEvent("mri_Qjobsystem:server:pullChanges", function(pullType)
             end
         end
     end
+end)
+
+RegisterNetEvent("mri_Qjobsystem:server:reloadDefinitions", function(target)
+    if source ~= 0 then
+        return
+    end
+
+    ReloadJobsRuntime(target)
+end)
+
+exports('ReloadDefinitions', function(target)
+    ReloadJobsRuntime(target)
 end)
 
 RegisterNetEvent("mri_Qjobsystem:server:createItem", function(craftingData, amount)
