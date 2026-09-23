@@ -78,8 +78,8 @@ BRIDGE.GetPlayerJob = function (playerId)
        local PlayerData = Framework.GetPlayerData(playerId)
        JobName = PlayerData.job.name
    elseif BRIDGE.Framework == "QB" then
-       local Player = Framework.Functions.GetPlayerData(playerId)
-       JobName = Player.job.name
+       local Player = Framework.Functions.GetPlayer(playerId)
+       JobName = Player and Player.PlayerData.job.name
    elseif BRIDGE.Framework == "OX" then
       local player = Ox.GetPlayer(playerId)
       local Job = player.get("inService")
@@ -94,8 +94,8 @@ BRIDGE.GetPlayerGang = function (playerId)
        local PlayerData = Framework.GetPlayerData(playerId)
        GangName = PlayerData.gang.name
    elseif BRIDGE.Framework == "QB" then
-       local Player = Framework.Functions.GetPlayerData(playerId)
-       GangName = Player.gang.name
+       local Player = Framework.Functions.GetPlayer(playerId)
+       GangName = Player and Player.PlayerData.gang.name
    elseif BRIDGE.Framework == "OX" then
       local player = Ox.GetPlayer(playerId)
       local Gang = player.get("inService")

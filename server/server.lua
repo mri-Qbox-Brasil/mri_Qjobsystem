@@ -318,11 +318,29 @@ RegisterNetEvent("mri_Qjobsystem:server:pullChanges", function(pullType)
     end
 end)
 
-RegisterNetEvent("mri_Qjobsystem:server:createItem", function(craftingData, amount)
-    local amount = amount or 1
+local function FindCrafting(craftingId)
+    for _, job in pairs(Jobs) do
+        for _, crafting in pairs(job.craftings or {}) do
+            if crafting.id == craftingId then
+                return crafting, job
+            end
+        end
+    end
+end
+
+RegisterNetEvent("mri_Qjobsystem:server:createItem", function(craftingId, itemIndex, itemName, amount)
+    local amount = tonumber(amount or 1)
     local src = source
+    if not amount or amount < 1 or amount ~= math.floor(amount) then return end
     if CanTrustPlayer(src) then
         if IsPlayerHasCustomPerms(src) then
+            local crafting, job = FindCrafting(craftingId)
+            if not crafting then return end
+            -- mesma regra do client: bancada com outro ícone é loja do ox_inventory
+            if (crafting.icon or 'fa-solid fa-screwdriver-wrench') ~= 'fa-solid fa-screwdriver-wrench' then return end
+            if not crafting.public and BRIDGE.GetPlayerJob(src) ~= job.job and BRIDGE.GetPlayerGang(src) ~= job.job then return end
+            local craftingData = crafting.items and crafting.items[itemIndex]
+            if type(craftingData) ~= "table" or craftingData.itemName ~= itemName or type(craftingData.ingedience) ~= "table" then return end
             local hasAllItems = true
             for _, v in pairs(craftingData.ingedience) do
                 if v.itemCount * amount > BRIDGE.GetItemCount(src, v.itemName) then
