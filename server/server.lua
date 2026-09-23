@@ -347,6 +347,8 @@ end)
 
 RegisterNetEvent("mri_Qjobsystem:server:makeRegisterAction", function(jobName, action, number)
     local src = source
+    number = tonumber(number)
+    if not number or number < 1 or number ~= math.floor(number) then return end
     if CanTrustPlayer(src) then
         if IsJobExist(jobName) then
             for _, job in pairs(Jobs) do
