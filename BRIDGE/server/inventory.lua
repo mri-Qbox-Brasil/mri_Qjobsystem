@@ -148,7 +148,6 @@ end
                                                      
 ]]--
 
-RegisterNetEvent(GetCurrentResourceName()..':playerLoaded')
 AddEventHandler(GetCurrentResourceName()..':playerLoaded',function(playerId)
     TriggerClientEvent(GetCurrentResourceName().."send_data", playerId, Drops)
 end)

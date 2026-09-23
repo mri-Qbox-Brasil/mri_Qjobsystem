@@ -269,11 +269,20 @@ RegisterNetEvent("mri_Qjobsystem:server:deleteJob", function(jobData)
                     if v.job == jobData.job then
                         table.remove(Jobs, i)
                         SaveJobs()
+
+                        dataJobs[v.job] = nil
+                        if v.type == "gang" then
+                            exports.qbx_core:RemoveGang(v.job)
+                        else
+                            exports.qbx_core:RemoveJob(v.job)
+                        end
+
                         lib.notify(src, {
                             title = "Sucesso",
                             description = "O grupo foi excluído!",
                             type = "success"
                         })
+                        break
                     end
                 end
             else
