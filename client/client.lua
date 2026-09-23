@@ -7,12 +7,12 @@ local function AddNewPed(pedData)
     table.insert(Peds, pedData)
 end
 
-local function generateCrafting(craftItems, label, type)
+local function generateCrafting(craftItems, label, type, craftingId)
     local options = {}
     local metadata = {}
     if craftItems and type then
         options = {}
-        for _, k in pairs(craftItems) do
+        for itemIndex, k in pairs(craftItems) do
             metadata = {{
                 label = "Itens requeridos",
                 value = ""
@@ -35,7 +35,7 @@ local function generateCrafting(craftItems, label, type)
                 onSelect = function()
                     -- Perguntar quantos ele quer fabricar
                     local input = lib.inputDialog('Digite a quantidade', {
-                        {type = 'number', label = 'Quantidade', default = 1}
+                        {type = 'number', label = 'Quantidade', default = 1, min = 1}
                     })
 
                     if not input then
@@ -92,7 +92,7 @@ local function generateCrafting(craftItems, label, type)
                             if animData.scully then
                                 ExecuteCommand("e c")
                             end
-                            TriggerSecureEvent("mri_Qjobsystem:server:createItem", k, amount)
+                            TriggerSecureEvent("mri_Qjobsystem:server:createItem", craftingId, itemIndex, k.itemName, amount)
                         end
                     else
                         lib.notify({
@@ -182,7 +182,7 @@ local function GenerateCraftings()
                             local type = (icon == 'fa-solid fa-screwdriver-wrench') and true or false
 
                             if type then
-                                generateCrafting(crafting.items, craftinglabel, type)
+                                generateCrafting(crafting.items, craftinglabel, type, crafting.id)
                             else
                                 exports.ox_inventory:openInventory('shop', {
                                     type = crafting.id
