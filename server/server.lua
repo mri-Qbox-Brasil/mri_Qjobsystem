@@ -58,6 +58,33 @@ local function PushGroup(job)
     end
 end
 
+local function IsManagedGroup(name)
+    for _, job in pairs(Jobs) do
+        if job.job == name then return true end
+    end
+    return false
+end
+
+-- Ajusta os grupos que vêm do shared/ do qbx_core (upstream) para o padrão MRI
+local function ApplyQboxDefaults()
+    if Config.RemoveQboxDefaultGroups then
+        for _, name in ipairs(Config.QboxDefaultJobs) do
+            if not IsManagedGroup(name) and exports.qbx_core:GetJob(name) then
+                exports.qbx_core:RemoveJob(name)
+            end
+        end
+
+        for _, name in ipairs(Config.QboxDefaultGangs) do
+            if not IsManagedGroup(name) and exports.qbx_core:GetGang(name) then
+                exports.qbx_core:RemoveGang(name)
+            end
+        end
+    end
+
+    exports.qbx_core:CreateJobs(Config.QboxBaseJobs)
+    exports.qbx_core:CreateGangs(Config.QboxBaseGangs)
+end
+
 local function LoadJobs(isStarting)
     if isStarting then
         DB.CreateTable()
@@ -72,6 +99,8 @@ local function LoadJobs(isStarting)
     else
         Jobs = json.decode(data[1].jobs)
     end
+
+    ApplyQboxDefaults()
 
     for _, job in pairs(Jobs) do
         if isStarting then

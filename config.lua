@@ -18,6 +18,38 @@ Config.BlacklistedStrings = {
     -- "weapon", "weed", "meth", "coke", "ammo", "gun", "pistol", "drug", "c4", "WEAPON", "AMMO", "at_", "keycard", "gun", "money", "black_money"
 }
 
+-- Remove do qbx_core os jobs/gangs de exemplo do Qbox (shared/jobs.lua e shared/gangs.lua),
+-- assim o qbx_core pode ficar idêntico ao upstream. Grupos criados aqui no jobsystem nunca são removidos.
+Config.RemoveQboxDefaultGroups = true
+
+Config.QboxDefaultJobs = {
+    'police', 'bcso', 'sasp', 'ambulance', 'realestate', 'taxi', 'bus', 'cardealer', 'mechanic',
+    'judge', 'lawyer', 'reporter', 'trucker', 'tow', 'garbage', 'vineyard', 'hotdog'
+}
+
+Config.QboxDefaultGangs = { 'lostmc', 'ballas', 'vagos', 'cartel', 'families', 'triads' }
+
+-- Grupos base do qbx_core (não podem ser removidos), aplicados por cima dos do upstream
+Config.QboxBaseJobs = {
+    ['unemployed'] = {
+        label = 'Civil',
+        defaultDuty = true,
+        offDutyPay = false,
+        grades = {
+            [0] = { name = 'Freelancer', payment = 10 },
+        },
+    },
+}
+
+Config.QboxBaseGangs = {
+    ['none'] = {
+        label = 'Sem gangue',
+        grades = {
+            [0] = { name = 'Sem cargo' },
+        },
+    },
+}
+
 Config.jobTypeList = {{
     value = 'leo',
     label = 'Policiais (leo)'
