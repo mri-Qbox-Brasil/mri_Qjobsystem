@@ -34,7 +34,6 @@ AddEventHandler('ox:playerLoaded', function(source, userid, charid)
 end)
 
 
-RegisterNetEvent(GetCurrentResourceName()..':playerLoaded')
 AddEventHandler(GetCurrentResourceName()..':playerLoaded',function(playerId, value1, value2)
 
 end)

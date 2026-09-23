@@ -22,6 +22,42 @@ local function decodeGrades(grades)
     return result
 end
 
+local function BuildGroupData(job)
+    if job.type == "job" then
+        return {
+            label = job.label,
+            type = job.jobtype,
+            defaultDuty = job.defaultDuty,
+            offDutyPay = false,
+            grades = decodeGrades(job.grades)
+        }
+    elseif job.type == "gang" then
+        return {
+            label = job.label,
+            grades = decodeGrades(job.grades)
+        }
+    end
+end
+
+local function PushGroup(job)
+    if type(job) ~= "table" or type(job.job) ~= "string" or type(job.grades) ~= "table" then
+        return
+    end
+
+    local data = BuildGroupData(job)
+    if not data then return end
+
+    dataJobs[job.job] = data
+
+    if job.type == "job" then
+        exports.qbx_core:CreateJob(job.job, data)
+    else
+        exports.qbx_core:CreateGangs({
+            [job.job] = data
+        })
+    end
+end
+
 local function LoadJobs(isStarting)
     if isStarting then
         DB.CreateTable()
@@ -71,26 +107,7 @@ local function LoadJobs(isStarting)
             end)
 
         end
-        if job.type == "job" then
-            dataJobs[job.job] = {
-                label = job.label,
-                type = job.jobtype,
-                defaultDuty = job.defaultDuty,
-                offDutyPay = false,
-                grades = decodeGrades(job.grades)
-            }
-            exports.qbx_core:CreateJobs({
-                [job.job] = dataJobs[job.job]
-            })
-        elseif job.type == "gang" then
-            dataJobs[job.job] = {
-                label = job.label,
-                grades = decodeGrades(job.grades)
-            }
-            exports.qbx_core:CreateGangs({
-                [job.job] = dataJobs[job.job]
-            })
-        end
+        PushGroup(job)
     end
     if isStarting then
         Wait(2000)
@@ -104,19 +121,33 @@ AddEventHandler('onResourceStart', function(resourceName)
     end
 end)
 
+local lastJobsPush = {}
+
 RegisterNetEvent('QBCore:Server:OnPlayerLoaded', function()
-    LoadJobs(true)
+    local src = source
+    local now = GetGameTimer()
+
+    if lastJobsPush[src] and now - lastJobsPush[src] < 2000 then return end
+    lastJobsPush[src] = now
+
+    Wait(2000)
+    TriggerClientEvent("mri_Qjobsystem:client:receiveJobs", src, Jobs)
+end)
+
+AddEventHandler('playerDropped', function()
+    lastJobsPush[source] = nil
 end)
 
 AddEventHandler(GetCurrentResourceName() .. ':playerLoaded', function(playerId)
-    LoadJobs(true)
-    Wait(2000)
     TriggerClientEvent("mri_Qjobsystem:client:receiveJobs", playerId, Jobs)
 end)
 
-local function SaveJobs()
+local function SaveJobs(changedJob)
     DB.SaveJobs(Jobs)
-    LoadJobs()
+
+    if changedJob then
+        PushGroup(changedJob)
+    end
 end
 
 local function IsJobExist(jobName)
@@ -155,12 +186,12 @@ RegisterNetEvent("mri_Qjobsystem:server:saveNewJob", function(jobData)
                     description = "Um novo trabalho foi criado!",
                     type = "success"
                 })
-                SaveJobs()
+                SaveJobs(jobData)
             else
                 for i, v in pairs(Jobs) do
                     if v.job == jobData.job then
                         Jobs[i] = jobData
-                        SaveJobs()
+                        SaveJobs(jobData)
                         lib.notify(src, {
                             title = "Sucesso",
                             description = "O trabalho foi salvo!",
@@ -181,7 +212,7 @@ RegisterNetEvent("mri_Qjobsystem:server:saveJob", function(jobData)
                 for i, v in pairs(Jobs) do
                     if v.job == jobData.job then
                         Jobs[i] = jobData
-                        SaveJobs()
+                        SaveJobs(jobData)
                         lib.notify(src, {
                             title = "Sucesso",
                             description = "O trabalho foi salvo!",
@@ -294,7 +325,7 @@ RegisterNetEvent("mri_Qjobsystem:server:makeRegisterAction", function(jobName, a
                                 description = "Realizado com sucesso!!",
                                 type = "success"
                             })
-                            SaveJobs()
+                            DB.SaveJobs(Jobs)
                         else
                             lib.notify(src, {
                                 title = "Retirar",
@@ -312,7 +343,7 @@ RegisterNetEvent("mri_Qjobsystem:server:makeRegisterAction", function(jobName, a
                                 description = "Realizado com sucesso!",
                                 type = "success"
                             })
-                            SaveJobs()
+                            DB.SaveJobs(Jobs)
                         else
                             lib.notify(src, {
                                 title = "Depósito",
@@ -346,6 +377,9 @@ RegisterNetEvent("mri_Qjobsystem:server:setBackup", function(pullType)
         if loadFile then
             Jobs = json.decode(loadFile)
             SaveJobs()
+            for _, job in pairs(Jobs) do
+                PushGroup(job)
+            end
         end
     end
 end)
@@ -388,14 +422,15 @@ lib.callback.register('mri_Qjobsystem:server:updateJobGradePermission', function
     jobEncontrado[propName] = not (jobEncontrado[propName] or false)
     data[propName] = jobEncontrado[propName]
 
+    local changedJob
             for i, jobGradeItem in pairs(Jobs) do
                 if jobGradeItem.label == data.label then
                     jobGradeItem.grades[key][propName] = data[propName]
+                    changedJob = jobGradeItem
                 break end
             end
 
-    DB.SaveJobs(Jobs)
-    LoadJobs(true)
+    SaveJobs(changedJob)
 
     lib.notify(source, {
         description = 'Cargo atualizado com sucesso!',
@@ -422,9 +457,11 @@ lib.callback.register('mri_Qjobsystem:server:updateJobGradePermission', function
         end
     end
     for i = 1, #groupEntries do
-        local playerID = groupEntries[i].citizenid
-        setPlayerFunction(playerID, data.groupName)
-        Wait(80)
+        local citizenid = groupEntries[i].citizenid
+        if exports.qbx_core:GetPlayerByCitizenId(citizenid) then
+            setPlayerFunction(citizenid, data.groupName)
+            Wait(80)
+        end
     end
     return data
 end)
