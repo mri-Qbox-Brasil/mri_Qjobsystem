@@ -33,7 +33,7 @@ Criador de jobs e gangs em jogo: cria os grupos no `qbx_core`, define cargos e s
 | `qbx_core` | Sim | Declarado em `dependencies`. Os grupos são registrados via `exports.qbx_core:CreateJobs` e `CreateGangs` |
 | `ox_lib` | Sim | Menus de contexto, `inputDialog`, `alertDialog`, `progressCircle`, callbacks, locale e comandos |
 | `oxmysql` | Sim | Persistência dos grupos na tabela `mri_qjobsystem` |
-| `mri_Qbox` | Sim | Declarado em `dependencies`. Fornece `GlobalState.UIColors`, usado na cor dos itens do menu |
+| `mri_Qbox` | Não | Fornece `GlobalState.UIColors`, usado na cor dos itens do menu. Sem ele, usa as mesmas cores por padrão |
 | `ox_inventory` | Sim | Lojas (`RegisterShop`, `openInventory`) e baús dos grupos. É o inventário padrão do `BRIDGE` |
 | `ox_target` | Sim | Pontos interativos no mundo. Alternativas configuráveis no `BRIDGE` |
 | `qbx_management` | Não | Boss menu e a aba de permissões de cargo. Sem ele, o boss menu não abre e os itens de permissão não aparecem |
@@ -241,7 +241,7 @@ O ponto de alarme dispara `exports["ps-dispatch"]:CustomAlert` para a job `polic
 
 ### mri_Qbox
 
-O client lê `GlobalState.UIColors` para colorir os itens do menu (verde para ativo, vermelho para inativo).
+O client lê `GlobalState.UIColors` para colorir os itens do menu (verde para ativo, vermelho para inativo). Sem o `mri_Qbox`, usa as mesmas cores por padrão.
 
 ---
 

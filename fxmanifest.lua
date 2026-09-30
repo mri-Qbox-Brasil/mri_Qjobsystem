@@ -35,7 +35,6 @@ dependencies {
     'qbx_core',
     'ox_lib',
     'oxmysql',
-    'mri_Qbox'
 }
 
 files {

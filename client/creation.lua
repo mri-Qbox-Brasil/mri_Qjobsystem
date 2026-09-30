@@ -1,5 +1,6 @@
 -- Variáveis
-ColorScheme = GlobalState.UIColors or {}
+-- cores de status da suíte (mri_Qbox publica em GlobalState.UIColors); sem ele, as mesmas por padrão
+ColorScheme = GlobalState.UIColors or { success = '#51CF66', danger = '#FF6347' }
 local items = BRIDGE.GetItems()
 local selectedJob = {}
 
